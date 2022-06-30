@@ -9,8 +9,8 @@ public class GiveOneCardMove : IPlayerMove
         CardToGive = cardToGift;
     }
 
-    public void Execute(Player player, Referee referee)
+    public void Execute(Referee referee)
     {
-        referee.Execute(player, this);
+        referee.Execute(this);
     }
 }

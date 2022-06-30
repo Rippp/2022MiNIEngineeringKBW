@@ -2,5 +2,5 @@
 
 public interface IPlayerMove
 {
-    void Execute(Player player, Referee referee);
+    void Execute(Referee referee);
 }

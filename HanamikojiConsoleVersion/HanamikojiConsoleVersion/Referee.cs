@@ -35,6 +35,8 @@ public class Referee
 
     public bool NextRound()
     {
+        ConsoleWrapper.ConsoleWriteGameState(PlayerOneData, PlayerTwoData, PlayerOne.ToString(), PlayerTwo.ToString());
+
         var nextCard = GetRandomCards(1).Single();
         CurrentPlayerData.CardsOnHand.Add(nextCard);
 

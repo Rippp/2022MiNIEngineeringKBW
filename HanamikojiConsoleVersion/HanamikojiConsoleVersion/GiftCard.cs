@@ -6,7 +6,7 @@ public class GiftCard
 {
     string CardName { get; set; }
 
-    GeishaType Type { get; set; }
+    public GeishaType Type { get; set; }
 
     public GiftCard(string cardName, GeishaType type)
     {

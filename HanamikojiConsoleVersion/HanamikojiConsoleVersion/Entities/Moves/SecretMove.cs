@@ -1,4 +1,4 @@
-﻿namespace HanamikojiConsoleVersion.Moves;
+﻿namespace HanamikojiConsoleVersion.Entities.Moves;
 
 public class SecretMove : IPlayerMove
 {

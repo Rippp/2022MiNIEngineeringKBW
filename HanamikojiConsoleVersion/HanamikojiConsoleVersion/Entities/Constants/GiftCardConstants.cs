@@ -1,8 +1,6 @@
-﻿using HanamikojiConsoleVersion.Types;
+﻿namespace HanamikojiConsoleVersion.Entities.Constants;
 
-namespace HanamikojiConsoleVersion.GameData;
-
-public static class GiftCardData
+public static class GiftCardConstants
 {
     public static List<GiftCard> AllCards = new List<GiftCard>
     {

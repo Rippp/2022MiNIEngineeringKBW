@@ -1,4 +1,4 @@
-﻿namespace HanamikojiConsoleVersion.Types;
+﻿namespace HanamikojiConsoleVersion.Entities;
 
 public enum GeishaType
 {

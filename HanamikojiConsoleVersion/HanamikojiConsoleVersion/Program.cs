@@ -1,19 +1,21 @@
-﻿using HanamikojiConsoleVersion;
+﻿using System.Runtime.InteropServices;
 
-namespace MyApp;
+namespace HanamikojiConsoleVersion;
 
-public class Program
+public partial class Program
 {
+    const int MAXIMIZE = 3;
+
     static void Main(string[] args)
     {
-        var p1 = new Player("Krzysztof");
-        var p2 = new Player("Adam");
-        var referee = new Referee(p1,p2);
-        
-        referee.BeginRound();
-
-        while(!referee.NextRound())
-        {
-        }
+        ShowWindow(ThisConsole, MAXIMIZE);
+        HanamikojiGame.RunGame();
     }
+
+    [DllImport("kernel32.dll", ExactSpelling = true)]
+    private static extern IntPtr GetConsoleWindow();
+    private static IntPtr ThisConsole = GetConsoleWindow();
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 }

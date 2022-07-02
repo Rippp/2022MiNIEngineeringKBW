@@ -1,7 +1,10 @@
-﻿using HanamikojiConsoleVersion.GameData;
-using HanamikojiConsoleVersion.Moves;
+﻿using HanamikojiConsoleVersion.Entities.Constants;
+using HanamikojiConsoleVersion.Entities.Moves;
+using HanamikojiConsoleVersion.InputUI;
+using HanamikojiConsoleVersion.Output;
+using Spectre.Console;
 
-namespace HanamikojiConsoleVersion;
+namespace HanamikojiConsoleVersion.Entities;
 
 public class Referee
 {
@@ -29,13 +32,13 @@ public class Referee
         PlayerTwoData = new PlayerData();
         CurrentPlayerData = PlayerOneData;
 
-        CardDeck = new List<GiftCard>(GiftCardData.AllCards);
+        CardDeck = new List<GiftCard>(GiftCardConstants.AllCards);
         _random = new Random();
     }
 
     public bool NextRound()
     {
-        ConsoleWrapper.ConsoleWriteGameState(PlayerOneData, PlayerTwoData, PlayerOne.ToString(), PlayerTwo.ToString());
+        PrintGameState();
 
         var nextCard = GetRandomCards(1).Single();
         CurrentPlayerData.CardsOnHand.Add(nextCard);
@@ -78,6 +81,20 @@ public class Referee
         var selectedCard = OtherPlayer.ChooseCompromiseCard(move.CardToChooseFrom);
         OtherPlayerData.GiftsFromPlayer.Add(selectedCard);
         CurrentPlayerData.GiftsFromPlayer.AddRange(move.CardToChooseFrom.Where(x => x != selectedCard));
+    }
+
+    private void PrintGameState()
+    {
+        ConsoleWrapper.PrintGeishaStates(PlayerOneData, PlayerTwoData, PlayerOne.ToString(), PlayerTwo.ToString());
+        var playerOneTable = ConsoleWrapper.GetCardsTable(PlayerOneData.CardsOnHand, PlayerOne.ToString());
+        var playerTwoTable = ConsoleWrapper.GetCardsTable(PlayerTwoData.CardsOnHand, PlayerTwo.ToString());
+        var deckCardsTable = ConsoleWrapper.GetCardsTable(CardDeck, "Deck");
+
+        var table = new Table();
+        table.AddColumn(new TableColumn(playerOneTable));
+        table.AddColumn(new TableColumn(playerTwoTable));
+        table.AddColumn(new TableColumn(deckCardsTable));
+        AnsiConsole.Write(table);
     }
 
     private void SwitchPlayer()

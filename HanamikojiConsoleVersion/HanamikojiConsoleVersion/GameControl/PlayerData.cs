@@ -1,4 +1,6 @@
-﻿namespace HanamikojiConsoleVersion.Entities;
+﻿using HanamikojiConsoleVersion.Entities;
+
+namespace HanamikojiConsoleVersion.GameControl;
 
 public class PlayerData
 {

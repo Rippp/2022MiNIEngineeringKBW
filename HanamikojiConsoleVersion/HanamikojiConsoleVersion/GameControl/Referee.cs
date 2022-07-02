@@ -1,10 +1,11 @@
-﻿using HanamikojiConsoleVersion.Entities.Constants;
+﻿using HanamikojiConsoleVersion.Entities;
+using HanamikojiConsoleVersion.Entities.Constants;
 using HanamikojiConsoleVersion.Entities.Moves;
 using HanamikojiConsoleVersion.InputUI;
 using HanamikojiConsoleVersion.Output;
 using Spectre.Console;
 
-namespace HanamikojiConsoleVersion.Entities;
+namespace HanamikojiConsoleVersion.GameControl;
 
 public class Referee
 {

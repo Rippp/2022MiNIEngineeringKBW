@@ -1,4 +1,5 @@
 ﻿using HanamikojiConsoleVersion.Entities;
+using HanamikojiConsoleVersion.GameControl;
 using HanamikojiConsoleVersion.InputUI;
 
 namespace HanamikojiConsoleVersion;

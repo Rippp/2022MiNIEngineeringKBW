@@ -1,4 +1,6 @@
-﻿namespace HanamikojiConsoleVersion.Entities.Moves;
+﻿using HanamikojiConsoleVersion.GameControl;
+
+namespace HanamikojiConsoleVersion.Entities.Moves;
 
 public class CompromiseMove : IPlayerMove
 {

@@ -1,5 +1,6 @@
 ﻿using HanamikojiConsoleVersion.Entities;
 using HanamikojiConsoleVersion.Entities.Constants;
+using HanamikojiConsoleVersion.GameControl;
 using Spectre.Console;
 
 namespace HanamikojiConsoleVersion.Output;

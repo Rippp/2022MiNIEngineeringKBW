@@ -15,4 +15,6 @@ public class CompromiseMove : IPlayerMove
     {
         referee.Execute(this);
     }
+
+    public override string ToString() => nameof(CompromiseMove);
 }

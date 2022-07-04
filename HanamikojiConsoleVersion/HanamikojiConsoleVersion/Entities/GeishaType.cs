@@ -2,8 +2,11 @@
 
 public enum GeishaType
 {
-    Geisha1,
-    Geisha2,
-    Geisha3,
-    Geisha4,
+    Geisha2_A,
+    Geisha2_B,
+    Geisha2_C,
+    Geisha3_A,
+    Geisha3_B,
+    Geisha4_A,
+    Geisha5_A,
 }

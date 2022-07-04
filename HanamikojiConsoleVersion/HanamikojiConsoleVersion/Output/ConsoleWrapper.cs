@@ -43,7 +43,6 @@ public static class ConsoleWrapper
         where T : notnull
     {
         var title = customTitle ?? $"Select value: ";
-        var instructions = customInstructions ?? "[grey](Press [blue]<space>[/] to toggle a fruit, [green]<enter>[/] to accept)[/]";
         var selectionPrompt = new SelectionPrompt<T>()
             .Title(title)
             .AddChoices(possibleValues)
@@ -86,8 +85,8 @@ public static class ConsoleWrapper
         var panelsForSecondRow = new List<Panel>();
         foreach (var geishaType in Enum.GetValues<GeishaType>())
         {
-            var playerOnePanel = new Panel($"{playerOneName}: {CountPointsForGeisha(playerOneData, geishaType)}");
-            var playerTwoPanel = new Panel($"{playerTwoName}: {CountPointsForGeisha(playerTwoData, geishaType)}");
+            var playerOnePanel = new Panel($"{playerOneName}: {playerOneData.CountPointsForGeishaType(geishaType)}");
+            var playerTwoPanel = new Panel($"{playerTwoName}: {playerTwoData.CountPointsForGeishaType(geishaType)}");
 
             panelsForFirstRow.Add(playerOnePanel);
             panelsForSecondRow.Add(playerTwoPanel);
@@ -99,6 +98,5 @@ public static class ConsoleWrapper
         AnsiConsole.Write(table);
     }
 
-    private static int CountPointsForGeisha(PlayerData playerData, GeishaType geishaType) =>
-        playerData.GiftsFromPlayer.Count(card => card.Type == geishaType);
+
 }

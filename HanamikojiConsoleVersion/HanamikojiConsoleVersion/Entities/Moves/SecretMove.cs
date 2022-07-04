@@ -8,11 +8,10 @@ public class SecretMove : IPlayerMove
 
     public SecretMove(GiftCard secretCard)
     {
-        SecretCard = secretCard;
+        SecretCard = secretCard; 
     }
 
-    public void Execute(Referee referee)
-    {
-        referee.Execute(this);
-    }
+    public void Execute(Referee referee) => referee.Execute(this);
+
+    public override string ToString() => nameof(SecretMove);
 }

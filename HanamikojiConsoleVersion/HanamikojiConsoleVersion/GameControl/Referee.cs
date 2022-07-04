@@ -1,4 +1,5 @@
-﻿using HanamikojiConsoleVersion.Entities;
+﻿using System.Data;
+using HanamikojiConsoleVersion.Entities;
 using HanamikojiConsoleVersion.Entities.Constants;
 using HanamikojiConsoleVersion.Entities.Moves;
 using HanamikojiConsoleVersion.InputUI;
@@ -13,7 +14,6 @@ public class Referee
     public Player PlayerOne { get; set; }
     public Player PlayerTwo { get; set; }
     public Player OtherPlayer => CurrentPlayer == PlayerOne ? PlayerTwo : PlayerOne;
-
 
     public PlayerData CurrentPlayerData { get; set; }
     public PlayerData PlayerOneData { get; set; }
@@ -44,20 +44,49 @@ public class Referee
         var nextCard = GetRandomCards(1).Single();
         CurrentPlayerData.CardsOnHand.Add(nextCard);
 
-        var move = CurrentPlayer.StartMove(CurrentPlayerData.CardsOnHand);
+        var availableMoves = CurrentPlayerData.GetAvailableMoves();
+
+        var move = CurrentPlayer.StartMove(CurrentPlayerData.CardsOnHand, availableMoves);
+
         move.Execute(this);
+        CurrentPlayerData.MarkMoveAsNotAvailable(move.ToString());
 
         SwitchPlayer();
 
         return CheckIfEndOfTheGame();
     }
 
-    public bool CheckIfEndOfTheGame() => CardDeck.Count() == 0;
+    public bool CheckIfEndOfTheGame()
+    {
+        var geishaScore = new Dictionary<GeishaType, (int playerOneScore, int playerTwoScore)>();
+
+        foreach (var geishaType in Enum.GetValues<GeishaType>())
+        {
+            var playerOneScore = PlayerOneData.CountPointsForGeishaType(geishaType);
+            var playerTwoScore = PlayerTwoData.CountPointsForGeishaType(geishaType);
+
+            geishaScore.Add(geishaType, (playerOneScore, playerTwoScore));
+        }
+
+        var convincedGeishaToPlayerOne = geishaScore.Where(x => x.Value.playerOneScore > x.Value.playerTwoScore).Select(x => x.Key);
+        var convincedGeishaToPlayerTwo = geishaScore.Where(x => x.Value.playerOneScore < x.Value.playerTwoScore).Select(x => x.Key);
+
+        var playerOnePoints = convincedGeishaToPlayerOne.Select(x => GeishaConstants.GeishaPoints[x]).Sum();
+        var playerTwoPoints = convincedGeishaToPlayerTwo.Select(x => GeishaConstants.GeishaPoints[x]).Sum();
+
+        const int pointsToWin = 11;
+        const int convincedGeishaToWin = 4;
+
+        return (playerOnePoints > pointsToWin ||
+                playerTwoPoints > pointsToWin ||
+                convincedGeishaToPlayerOne.Count() >= convincedGeishaToWin ||
+                convincedGeishaToPlayerTwo.Count() >= convincedGeishaToWin);
+    }
 
     public void BeginRound()
     {
-        PlayerOneData.CardsOnHand.AddRange(GetRandomCards(3));
-        PlayerTwoData.CardsOnHand.AddRange(GetRandomCards(3));
+        PlayerOneData.CardsOnHand.AddRange(GetRandomCards(6));
+        PlayerTwoData.CardsOnHand.AddRange(GetRandomCards(6));
     }
 
     public List<GiftCard> GetRandomCards(int numberOfCards)
@@ -73,27 +102,84 @@ public class Referee
         return cardsForPlayer;
     }
 
-    public void Execute(GiveOneCardMove move) => CurrentPlayerData.GiftsFromPlayer.Add(move.CardToGive);
+    public void Execute(SecretMove move)
+    {
+        CurrentPlayerData.SecretCard = move.SecretCard;
+        CurrentPlayerData.CardsOnHand.Remove(move.SecretCard);
+    }
 
-    public void Execute(SecretMove move) => CurrentPlayerData.SecretCard = move.SecretCard;    
+    public void Execute(EliminationMove move)
+    {
+        CurrentPlayerData.EliminatedCards = move.EliminatedCards;
+        CurrentPlayerData.CardsOnHand.RemoveAll(x => move.EliminatedCards.Contains(x));
+    }
 
     public void Execute(CompromiseMove move)
     {
         var selectedCard = OtherPlayer.ChooseCompromiseCard(move.CardToChooseFrom);
         OtherPlayerData.GiftsFromPlayer.Add(selectedCard);
         CurrentPlayerData.GiftsFromPlayer.AddRange(move.CardToChooseFrom.Where(x => x != selectedCard));
+        CurrentPlayerData.CardsOnHand.RemoveAll(x => move.CardToChooseFrom.Contains(x));
+    }
+
+    public void Execute(DoubleGiftMove move)
+    {
+        var selectedCards = OtherPlayer.ChooseDoubleGift(move.PairOne, move.PairTwo);
+        var collectionForOtherPlayer = selectedCards;
+        var collectionForCurrentPlayer = selectedCards == move.PairOne ? move.PairTwo : move.PairOne;
+        OtherPlayerData.GiftsFromPlayer.AddRange(collectionForOtherPlayer);
+        CurrentPlayerData.GiftsFromPlayer.AddRange(collectionForCurrentPlayer);
+        CurrentPlayerData.CardsOnHand.RemoveAll(x => move.PairOne.Contains(x) || move.PairTwo.Contains(x));
     }
 
     private void PrintGameState()
     {
         ConsoleWrapper.PrintGeishaStates(PlayerOneData, PlayerTwoData, PlayerOne.ToString(), PlayerTwo.ToString());
-        var playerOneTable = ConsoleWrapper.GetCardsTable(PlayerOneData.CardsOnHand, PlayerOne.ToString());
-        var playerTwoTable = ConsoleWrapper.GetCardsTable(PlayerTwoData.CardsOnHand, PlayerTwo.ToString());
+        const string HandLabel = "Hand";
+        const string SecretLabel = "Secret";
+        const string EliminationCardsLabel = "Elimination Cards";
+        
+        // hand
+        var cardsInHandPlayerOneTable = ConsoleWrapper.GetCardsTable(PlayerOneData.CardsOnHand, HandLabel);
+        var cardsInHandPlayerTwoTable = ConsoleWrapper.GetCardsTable(PlayerTwoData.CardsOnHand, HandLabel);
+        
+        // deck
         var deckCardsTable = ConsoleWrapper.GetCardsTable(CardDeck, "Deck");
+        
+        // secret
+        var secretsPlayerOne = PlayerOneData.SecretCard is not null ? new List<GiftCard>{ PlayerOneData.SecretCard } : new List<GiftCard>();
+        var secretsPlayerTwo = PlayerTwoData.SecretCard is not null ? new List<GiftCard> { PlayerTwoData.SecretCard } : new List<GiftCard>();
+        var playerOneSecretTable = ConsoleWrapper.GetCardsTable(secretsPlayerOne, SecretLabel);
+        var playerTwoSecretTable = ConsoleWrapper.GetCardsTable(secretsPlayerTwo, SecretLabel);
+
+
+        // elimination
+        var eliminationPlayerOne = PlayerOneData.EliminatedCards is not null
+            ? new List<GiftCard> (PlayerOneData.EliminatedCards)
+            : new List<GiftCard>();
+        var eliminationPlayerTwo = PlayerTwoData.EliminatedCards is not null
+            ? new List<GiftCard> (PlayerTwoData.EliminatedCards)
+            : new List<GiftCard>();
+        var eliminationPlayerOneTable = ConsoleWrapper.GetCardsTable(eliminationPlayerOne, EliminationCardsLabel);
+        var eliminationPlayerTwoTable = ConsoleWrapper.GetCardsTable(eliminationPlayerTwo, EliminationCardsLabel);
+
+        // First column
+        var tablePlayerOne = new Table();
+        tablePlayerOne.AddColumn(new TableColumn(PlayerOne.ToString()));
+        tablePlayerOne.AddRow(cardsInHandPlayerOneTable);
+        tablePlayerOne.AddRow(playerOneSecretTable);
+        tablePlayerOne.AddRow(eliminationPlayerOneTable);
+
+        // Second column
+        var tablePlayerTwo = new Table();
+        tablePlayerTwo.AddColumn(new TableColumn(PlayerTwo.ToString()));
+        tablePlayerTwo.AddRow(cardsInHandPlayerTwoTable);
+        tablePlayerTwo.AddRow(playerTwoSecretTable);
+        tablePlayerTwo.AddRow(eliminationPlayerTwoTable);
 
         var table = new Table();
-        table.AddColumn(new TableColumn(playerOneTable));
-        table.AddColumn(new TableColumn(playerTwoTable));
+        table.AddColumn(new TableColumn(tablePlayerOne));
+        table.AddColumn(new TableColumn(tablePlayerTwo));
         table.AddColumn(new TableColumn(deckCardsTable));
         AnsiConsole.Write(table);
     }
@@ -105,4 +191,3 @@ public class Referee
         CurrentPlayerData = isPlayerOneCurrent ? PlayerTwoData : PlayerOneData;
     }
 }
-

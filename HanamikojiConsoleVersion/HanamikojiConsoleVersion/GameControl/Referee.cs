@@ -23,6 +23,8 @@ public class Referee
     public List<GiftCard> CardDeck { get; set; }
     private Random _random;
 
+    private Dictionary<GeishaType, Player?> convincedToPlayerInPreviousRound;
+
     public Referee(Player playerOne, Player playerTwo)
     {
         PlayerOne = playerOne;
@@ -31,10 +33,17 @@ public class Referee
 
         PlayerOneData = new PlayerData();
         PlayerTwoData = new PlayerData();
+
+        convincedToPlayerInPreviousRound = new();
+        foreach (var geishaType in Enum.GetValues<GeishaType>())
+        {
+            convincedToPlayerInPreviousRound.Add(geishaType, null);
+        }
+
         CurrentPlayerData = PlayerOneData;
 
-        CardDeck = new List<GiftCard>(GiftCardConstants.AllCards);
         _random = new Random();
+        StartNewRound();
     }
 
     public bool NextRound()
@@ -53,53 +62,20 @@ public class Referee
 
         SwitchPlayer();
 
-        return CheckIfEndOfTheGame();
-    }
-
-    public bool CheckIfEndOfTheGame()
-    {
-        var geishaScore = new Dictionary<GeishaType, (int playerOneScore, int playerTwoScore)>();
-
-        foreach (var geishaType in Enum.GetValues<GeishaType>())
+        if (!CurrentPlayerData.IsAnyMoveAvailable() && !OtherPlayerData.IsAnyMoveAvailable())
         {
-            var playerOneScore = PlayerOneData.CountPointsForGeishaType(geishaType);
-            var playerTwoScore = PlayerTwoData.CountPointsForGeishaType(geishaType);
-
-            geishaScore.Add(geishaType, (playerOneScore, playerTwoScore));
+            if (CheckIfEndOfTheGame(out var convincedToPlayerOne, out var ConvincedToPlayerTwo))
+            {
+                return true;
+            }
+            else
+            {
+                SaveConvincedGeisha(convincedToPlayerOne, ConvincedToPlayerTwo);
+                StartNewRound();
+            }
         }
 
-        var convincedGeishaToPlayerOne = geishaScore.Where(x => x.Value.playerOneScore > x.Value.playerTwoScore).Select(x => x.Key);
-        var convincedGeishaToPlayerTwo = geishaScore.Where(x => x.Value.playerOneScore < x.Value.playerTwoScore).Select(x => x.Key);
-
-        var playerOnePoints = convincedGeishaToPlayerOne.Select(x => GeishaConstants.GeishaPoints[x]).Sum();
-        var playerTwoPoints = convincedGeishaToPlayerTwo.Select(x => GeishaConstants.GeishaPoints[x]).Sum();
-
-        const int pointsToWin = 11;
-        const int convincedGeishaToWin = 4;
-
-        return (playerOnePoints > pointsToWin ||
-                playerTwoPoints > pointsToWin ||
-                convincedGeishaToPlayerOne.Count() >= convincedGeishaToWin ||
-                convincedGeishaToPlayerTwo.Count() >= convincedGeishaToWin);
-    }
-
-    public void BeginRound()
-    {
-        PlayerOneData.CardsOnHand.AddRange(GetRandomCards(6));
-        PlayerTwoData.CardsOnHand.AddRange(GetRandomCards(6));
-    }
-
-    public List<GiftCard> GetRandomCards(int numberOfCards)
-    {
-        var cardsForPlayer = new List<GiftCard>();
-        for (int i = 0; i < numberOfCards; i++)
-        {
-            var randomCardIndex = _random.Next(CardDeck.Count());
-            cardsForPlayer.Add(CardDeck[randomCardIndex]);
-            CardDeck.RemoveAt(randomCardIndex);
-        }
-
-        return cardsForPlayer;
+        return false;
     }
 
     public void Execute(SecretMove move)
@@ -132,9 +108,71 @@ public class Referee
         CurrentPlayerData.CardsOnHand.RemoveAll(x => move.PairOne.Contains(x) || move.PairTwo.Contains(x));
     }
 
+    private void SaveConvincedGeisha(IReadOnlyList<GeishaType> convincedToPlayerOne, IReadOnlyList<GeishaType> convincedToPlayerTwo)
+    {
+        foreach (var geishaConvincedToPlayerOne in convincedToPlayerOne)
+            convincedToPlayerInPreviousRound[geishaConvincedToPlayerOne] = PlayerOne;
+    
+        foreach(var geishaConvincedToPlayerTwo in convincedToPlayerTwo)
+            convincedToPlayerInPreviousRound[geishaConvincedToPlayerTwo] = PlayerTwo;
+    }
+
+    private void StartNewRound()
+    {
+        CardDeck = new List<GiftCard>(GiftCardConstants.AllCards);
+        CurrentPlayerData.ClearData();
+        OtherPlayerData.ClearData();
+        PlayerOneData.CardsOnHand.AddRange(GetRandomCards(6));
+        PlayerTwoData.CardsOnHand.AddRange(GetRandomCards(6));
+    }
+
+    private bool CheckIfEndOfTheGame(out IReadOnlyList<GeishaType> convincedToPlayerOne, out IReadOnlyList<GeishaType> convincedToPlayerTwo)
+    {
+        var geishaScore = new Dictionary<GeishaType, (int playerOneScore, int playerTwoScore)>();
+
+        foreach (var geishaType in Enum.GetValues<GeishaType>())
+        {
+            var playerOneScore = PlayerOneData.CountPointsForGeishaType(geishaType);
+            var playerTwoScore = PlayerTwoData.CountPointsForGeishaType(geishaType);
+
+            playerOneScore += PlayerOneData.SecretCard?.Type == geishaType ? 1 : 0;
+            playerTwoScore += PlayerTwoData.SecretCard?.Type == geishaType ? 1 : 0;
+
+            geishaScore.Add(geishaType, (playerOneScore, playerTwoScore));
+        }
+
+        convincedToPlayerOne = geishaScore.Where(x => x.Value.playerOneScore > x.Value.playerTwoScore).Select(x => x.Key).ToList();
+        convincedToPlayerTwo = geishaScore.Where(x => x.Value.playerOneScore < x.Value.playerTwoScore).Select(x => x.Key).ToList();
+
+        var playerOnePoints = convincedToPlayerOne.Select(x => GeishaConstants.GeishaPoints[x]).Sum();
+        var playerTwoPoints = convincedToPlayerTwo.Select(x => GeishaConstants.GeishaPoints[x]).Sum();
+
+        const int pointsToWin = 11;
+        const int convincedGeishaToWin = 4;
+
+        return (playerOnePoints > pointsToWin ||
+                playerTwoPoints > pointsToWin ||
+                convincedToPlayerOne.Count() >= convincedGeishaToWin ||
+                convincedToPlayerTwo.Count() >= convincedGeishaToWin);
+    }
+
+    private List<GiftCard> GetRandomCards(int numberOfCards)
+    {
+        var cardsForPlayer = new List<GiftCard>();
+        for (int i = 0; i < numberOfCards; i++)
+        {
+            var randomCardIndex = _random.Next(CardDeck.Count());
+            cardsForPlayer.Add(CardDeck[randomCardIndex]);
+            CardDeck.RemoveAt(randomCardIndex);
+        }
+
+        return cardsForPlayer;
+    }
+
+ 
     private void PrintGameState()
     {
-        ConsoleWrapper.PrintGeishaStates(PlayerOneData, PlayerTwoData, PlayerOne.ToString(), PlayerTwo.ToString());
+        ConsoleWrapper.PrintGeishaStates(PlayerOneData, PlayerTwoData, convincedToPlayerInPreviousRound, PlayerOne.ToString(), PlayerTwo.ToString());
         const string HandLabel = "Hand";
         const string SecretLabel = "Secret";
         const string EliminationCardsLabel = "Elimination Cards";

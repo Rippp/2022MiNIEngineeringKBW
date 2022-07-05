@@ -20,16 +20,26 @@ public class PlayerData
 
     public List<string> GetAvailableMoves() 
         => _movesAvailability.Where(x => x.Value).Select(x => x.Key).ToList();
-
     public bool IsMoveAvailable(string move) => _movesAvailability[move];
 
     public void MarkMoveAsNotAvailable(string move) => _movesAvailability[move] = false;
 
-    public void MakeAllMovesAvailable()
+    public bool IsAnyMoveAvailable() => _movesAvailability.Any(x => x.Value);
+
+    public void ClearData()
     {
-        foreach (var move in _movesAvailability.Keys) _movesAvailability[move] = true;
+        CardsOnHand.Clear();
+        GiftsFromPlayer.Clear();
+        SecretCard = null;
+        EliminatedCards = null;
+        _makeAllMovesAvailable();
     }
 
     public int CountPointsForGeishaType(GeishaType geishaType) =>
         GiftsFromPlayer.Count(card => card.Type == geishaType);
+
+    private void _makeAllMovesAvailable()
+    {
+        foreach (var move in _movesAvailability.Keys) _movesAvailability[move] = true;
+    }
 }

@@ -12,8 +12,6 @@ public static class HanamikojiGame
         var p2 = new Player("Adam");
         var referee = new Referee(p1, p2);
 
-        referee.BeginRound();
-
         while (!referee.NextRound())
         {
         }

@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TCPExperiment", "TCPExperiment\TCPExperiment.csproj", "{3105F156-9B87-44D7-B66B-A4C6E9A7B4A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server", "TCPExperiment\Server.csproj", "{3105F156-9B87-44D7-B66B-A4C6E9A7B4A5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "Client\Client.csproj", "{13D7DCD1-CC19-4B04-9480-46AD737D98D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{A4A04180-F161-4EE5-9EBF-950D6E87B363}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{3105F156-9B87-44D7-B66B-A4C6E9A7B4A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3105F156-9B87-44D7-B66B-A4C6E9A7B4A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3105F156-9B87-44D7-B66B-A4C6E9A7B4A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13D7DCD1-CC19-4B04-9480-46AD737D98D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13D7DCD1-CC19-4B04-9480-46AD737D98D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13D7DCD1-CC19-4B04-9480-46AD737D98D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13D7DCD1-CC19-4B04-9480-46AD737D98D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4A04180-F161-4EE5-9EBF-950D6E87B363}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4A04180-F161-4EE5-9EBF-950D6E87B363}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4A04180-F161-4EE5-9EBF-950D6E87B363}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4A04180-F161-4EE5-9EBF-950D6E87B363}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,17 @@
+﻿using HanamikojiConsoleVersion.GameControl;
+
+namespace HanamikojiConsoleVersion.Entities.Moves;
+
+public class SecretMove : IPlayerMove
+{
+    public GiftCard SecretCard { get; private set; }
+
+    public SecretMove(GiftCard secretCard)
+    {
+        SecretCard = secretCard; 
+    }
+
+    public void Execute(Referee referee) => referee.Execute(this);
+
+    public override string ToString() => nameof(SecretMove);
+}

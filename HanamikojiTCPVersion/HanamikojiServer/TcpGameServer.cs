@@ -1,8 +1,8 @@
-﻿using System.Net;
+﻿using CommonResources.Network;
+using System.Net;
 using System.Net.Sockets;
-using Infrastructure;
 
-namespace Server;
+namespace HanamikojiServer;
 
 public class TcpGameServer
 {
@@ -16,10 +16,9 @@ public class TcpGameServer
 
     // current games and clients
     private List<TcpClient> _connectedClients = new List<TcpClient>();
-    private Dictionary<TcpClient, Game> _gameClientIsIn = new Dictionary<TcpClient, Game>();
-    private List<Game> _games = new List<Game>();
+    private List<HanamikojiGame> _games = new List<HanamikojiGame>();
     private List<Thread> _gameThreads = new List<Thread>();
-    private Game _nextGame;
+    private HanamikojiGame _nextGame;
 
     public TcpGameServer(int port)
     {
@@ -32,7 +31,7 @@ public class TcpGameServer
     public async Task Run()
     {
         Running = true;
-        _nextGame = new Game(this);
+        _nextGame = new HanamikojiGame(this);
 
         _newConnectionListener.Start();
         Console.WriteLine("Waiting for incoming connections...");
@@ -66,7 +65,7 @@ public class TcpGameServer
                 _games.Add(_nextGame);
                 _gameThreads.Add(gameThread);
 
-                _nextGame = new Game(this);
+                _nextGame = new HanamikojiGame(this);
             }
 
             Parallel.ForEach(_waitingLobby, (clientInLobby) =>
@@ -117,7 +116,7 @@ public class TcpGameServer
         // Remove from collections and free resources
         _connectedClients.Remove(client);
         _waitingLobby.Remove(client);
-        
+
         // clean up client
         client.GetStream().Close();
         client.Close();

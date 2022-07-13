@@ -1,8 +1,8 @@
-﻿using System.Net.Sockets;
+﻿using CommonResources.Network;
+using System.Net.Sockets;
 using System.Text;
-using Infrastructure;
 
-namespace Client;
+namespace HanamikojiClient;
 
 public class TcpGameClient
 {

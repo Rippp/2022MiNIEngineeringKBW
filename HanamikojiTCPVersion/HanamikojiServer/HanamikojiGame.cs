@@ -1,4 +1,5 @@
-﻿using CommonResources.Game;
+﻿using CommonResources;
+using CommonResources.Game;
 using CommonResources.Game.Constants;
 using CommonResources.Network;
 using HanamikojiServer.States;
@@ -11,24 +12,21 @@ namespace HanamikojiServer
         public Guid GameIdentifier = Guid.NewGuid();
         public bool MissingPlayer => _playerOneTcpClient is null || _playerTwoTcpClient is null;
         public int RequiredPlayers = 2;
+        private List<GiftCard> _cardDeck { get; set; }
 
         private TcpGameServer _server;
         private TcpClient? _playerOneTcpClient;
         private TcpClient? _playerTwoTcpClient;
-
         private TcpClient? _currentPlayer;
         private TcpClient? _otherPlayer => _currentPlayer == _playerOneTcpClient ? _playerTwoTcpClient : _playerOneTcpClient;
-
-        private bool _gameRunning;
-        private AbstractServerState _currentState;
 
         private PlayerData _playerOneData;
         private PlayerData _playerTwoData;
         private PlayerData _currentPlayerData;
         private PlayerData _otherPlayerData => _currentPlayerData == _playerOneData ? _playerTwoData : _playerOneData;
 
-
-        public List<GiftCard> CardDeck { get; set; }
+        private bool _gameRunning;
+        private AbstractServerState _currentState;
         private Random _random;
 
         public HanamikojiGame(TcpGameServer server)
@@ -38,7 +36,7 @@ namespace HanamikojiServer
             _playerOneData = new PlayerData();
             _playerTwoData = new PlayerData();
             _random = new Random();
-            CardDeck = new List<GiftCard>();
+            _cardDeck = new List<GiftCard>();
         }
 
         public void AddPlayer(TcpClient tcpClient)
@@ -64,78 +62,55 @@ namespace HanamikojiServer
 
             while (_gameRunning)
             {
-                Console.WriteLine(value: $"Playing game {GameIdentifier}!");
-
                 CheckIfPlayerDisconnected();
+
                 ChangeState(_currentState.DoWork());
 
                 Thread.Sleep(10);
             }
 
-
             DisconnectPlayer(_playerOneTcpClient);
             DisconnectPlayer(_playerTwoTcpClient);
         }
 
-        private void DisconnectPlayer(TcpClient player)
-        {
-            if (player?.Connected ?? false)
-                player?.GetStream().Close();
-            player?.Close();
-        }
-
-        private void CheckIfPlayerDisconnected()
-        {
-            if (CheckIfPlayerDisconnected(_playerOneTcpClient))
-            {
-                PacketProcessing.SendPacket(_playerTwoTcpClient.GetStream(), new Packet("error", "other player disconnected"))
-                    .GetAwaiter().GetResult();
-                StopGame("Player one left the game");
-            }
-
-            if (CheckIfPlayerDisconnected(_playerTwoTcpClient))
-            {
-                PacketProcessing.SendPacket(_playerOneTcpClient.GetStream(), new Packet("error", "other player disconnected"))
-                    .GetAwaiter().GetResult();
-                StopGame("Player two left the game");
-            }
-        }
-
-        private void StopGame(string reason = "")
-        {
-            _gameRunning = false;
-            Console.WriteLine($"[GAME {GameIdentifier}] : Stopping the Game because: {reason}");
-        }
-
-        private bool CheckIfPlayerDisconnected(TcpClient client)
+        public async Task<Packet?> ReadFromCurrentPlayer() => await ReadFromPlayer(_currentPlayer);
+        public async Task<Packet?> ReadFromOtherPlayer() => await ReadFromPlayer(_otherPlayer);
+        private async Task<Packet?> ReadFromPlayer(TcpClient player)
         {
             try
             {
-                var clientSocket = client.Client;
-                return clientSocket.Poll(10 * 1000, SelectMode.SelectRead) && (clientSocket.Available == 0);
+                if (player.Available > 0)
+                {
+                    return await PacketProcessing.ReceivePacket(player.GetStream());
+                }
             }
-            catch (SocketException)
+            catch (Exception exception)
             {
-                // We got a socket error, assume it's disconnected
-                return true;
+                ConsoleWrapper.WriteError(exception.Message);
             }
+
+            return null;
         }
 
-        public void SendToCurrentPlayer(string command, string message)
-        {
-            if (_currentPlayer == null) return;
+        public void SendToCurrentPlayer(PacketCommandEnum command, string message)
+        =>
+            SendToPlayer(_currentPlayer, command, message);
+        
 
-            PacketProcessing.SendPacket(_currentPlayer.GetStream(), new Packet(command, message))
+        public void SendToOtherPlayer(PacketCommandEnum command, string message)
+        =>
+            SendToPlayer(_otherPlayer, command, message);
+        
+
+        public void SendToPlayer(TcpClient player, PacketCommandEnum command, string message)
+        {
+            if (player == null) return;
+
+            PacketProcessing.SendPacket(player.GetStream(), new Packet(command, message))
                 .GetAwaiter().GetResult();
         }
 
-        public void SendToOtherPlayer(string command, string message)
-        {
-            if (_otherPlayer == null) return;
 
-            PacketProcessing.SendPacket(_otherPlayer.GetStream(), new Packet(command, message))
-                .GetAwaiter().GetResult();
-        }
 
         public void SwitchPlayer()
         {
@@ -146,13 +121,13 @@ namespace HanamikojiServer
 
         public void SendGameDataToPlayers()
         {
-            SendToCurrentPlayer("GameData", _currentPlayerData.SerializeToJson());
-            SendToOtherPlayer("GameData", _otherPlayerData.SerializeToJson());
+            SendToCurrentPlayer(PacketCommandEnum.GameData, _currentPlayerData.SerializeToJson());
+            SendToOtherPlayer(PacketCommandEnum.GameData, _otherPlayerData.SerializeToJson());
         }
 
         public void StartNewRound()
         {
-            CardDeck = new List<GiftCard>(GiftCardConstants.AllCards);
+            _cardDeck = new List<GiftCard>(GiftCardConstants.AllCards);
             _currentPlayerData.ClearData();
             _otherPlayerData.ClearData();
             _playerOneData.CardsOnHand.AddRange(GetRandomCards(6));
@@ -169,14 +144,58 @@ namespace HanamikojiServer
             _currentState.EnterState();
         }
 
+        public void StopGame(string reason = "")
+        {
+            _gameRunning = false;
+            Console.WriteLine($"[GAME {GameIdentifier}] : Stopping the Game because: {reason}");
+        }
+       
+        private void DisconnectPlayer(TcpClient player)
+        {
+            if (player?.Connected ?? false)
+                player?.GetStream().Close();
+            player?.Close();
+        }
+
+        private void CheckIfPlayerDisconnected()
+        {
+            if (CheckIfPlayerDisconnected(_playerOneTcpClient))
+            {
+                PacketProcessing.SendPacket(_playerTwoTcpClient.GetStream(), new Packet(PacketCommandEnum.Error, "other player disconnected"))
+                    .GetAwaiter().GetResult();
+                StopGame("Player one left the game");
+            }
+
+            if (CheckIfPlayerDisconnected(_playerTwoTcpClient))
+            {
+                PacketProcessing.SendPacket(_playerOneTcpClient.GetStream(), new Packet(PacketCommandEnum.Error, "other player disconnected"))
+                    .GetAwaiter().GetResult();
+                StopGame("Player two left the game");
+            }
+        }
+
+        private bool CheckIfPlayerDisconnected(TcpClient client)
+        {
+            try
+            {
+                var clientSocket = client.Client;
+                return clientSocket.Poll(10 * 1000, SelectMode.SelectRead) && (clientSocket.Available == 0);
+            }
+            catch (SocketException)
+            {
+                // We got a socket error, assume it's disconnected
+                return true;
+            }
+        }
+
         private List<GiftCard> GetRandomCards(int numberOfCards)
         {
             var cardsForPlayer = new List<GiftCard>();
             for (int i = 0; i < numberOfCards; i++)
             {
-                var randomCardIndex = _random.Next(CardDeck.Count());
-                cardsForPlayer.Add(CardDeck[randomCardIndex]);
-                CardDeck.RemoveAt(randomCardIndex);
+                var randomCardIndex = _random.Next(_cardDeck.Count());
+                cardsForPlayer.Add(_cardDeck[randomCardIndex]);
+                _cardDeck.RemoveAt(randomCardIndex);
             }
 
             return cardsForPlayer;

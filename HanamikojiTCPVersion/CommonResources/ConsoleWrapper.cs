@@ -1,4 +1,4 @@
-﻿namespace HanamikojiClient
+﻿namespace CommonResources
 {
     public static class ConsoleWrapper
     {

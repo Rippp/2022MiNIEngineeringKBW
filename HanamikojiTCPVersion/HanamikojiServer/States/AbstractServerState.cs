@@ -10,7 +10,7 @@
         }
 
         public abstract void EnterState();
-        public abstract AbstractServerState DoWork();
+        public abstract AbstractServerState? DoWork();
         public abstract void ExitState();
     }
 }

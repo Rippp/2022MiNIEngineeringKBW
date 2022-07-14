@@ -53,7 +53,7 @@ public class TcpGameServer
 
                     _nextGame.AddPlayer(firstPlayerInLobby);
                     await PacketProcessing.SendPacket(firstPlayerInLobby.GetStream(),
-                        new Packet("message", $"Joined to game {_nextGame.GameIdentifier}"));
+                        new Packet(PacketCommandEnum.Message, $"Joined to game {_nextGame.GameIdentifier}"));
                     _waitingLobby.RemoveAt(0);
                 }
 
@@ -108,7 +108,7 @@ public class TcpGameServer
         _waitingLobby.Add(newClient);
 
         await PacketProcessing.SendPacket(newClient.GetStream(),
-            new Packet("message", $"Welcome to the Game Server. Wait to join the game\n"));
+            new Packet(PacketCommandEnum.Message, $"Welcome to the Game Server. Wait to join the game\n"));
     }
 
     public void HandleDisconnectedClient(TcpClient client)

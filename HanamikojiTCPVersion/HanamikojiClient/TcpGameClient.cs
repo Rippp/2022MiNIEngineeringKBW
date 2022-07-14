@@ -1,4 +1,6 @@
-﻿using CommonResources.Network;
+﻿using CommonResources;
+using CommonResources.Network;
+using HanamikojiClient.States;
 using System.Net.Sockets;
 using System.Text;
 
@@ -9,9 +11,10 @@ public class TcpGameClient
     public readonly string ServerAddress;
     public readonly int Port;
     public bool Running { get; private set; }
+    
     private TcpClient _server;
-
     private NetworkStream _msgStream = null;
+    private AbstractClientState? _currentState = null;
 
     public TcpGameClient(string serverAddress, int port)
     {
@@ -47,9 +50,14 @@ public class TcpGameClient
 
     public void Run()
     {
+        ChangeState(new AwaitingPacketState(this));
+
         while (Running)
         {
-            _ = handleIncomingPackets();
+            if (IsDisconnect(_server))
+                Disconnect();
+
+            ChangeState(_currentState.DoWork());
 
             Thread.Sleep(10);
         }
@@ -57,29 +65,52 @@ public class TcpGameClient
         CleanupNetworkResources();
     }
 
-    private async Task handleIncomingPackets()
+    public void ChangeState(AbstractClientState state)
+    {
+        if (state == null) return;
+
+        if (_currentState != null)
+            _currentState.ExitState();
+        _currentState = state;
+        _currentState.EnterState();
+    }
+    public async Task<Packet?> ReadFromServer()
     {
         try
         {
             if (_server.Available > 0)
             {
-                await HandlePacket(PacketProcessing.ReceivePacket(_msgStream).GetAwaiter().GetResult());
+                var packet = await PacketProcessing.ReceivePacket(_msgStream);
+                HandlePacket(packet);
+                return packet;
             }
         }
         catch (Exception exception)
         {
             ConsoleWrapper.WriteError(exception.Message);
         }
+
+        return null;
+    }
+    public void SendToServer(PacketCommandEnum command, string message="")
+    {
+        PacketProcessing.SendPacket(_msgStream, new Packet(command, message))
+            .GetAwaiter().GetResult();
+    }
+
+    public void DisplayPacket(Packet packet)
+    {
+        Console.WriteLine(packet.ToString());
     }
 
     private async Task HandlePacket(Packet packet)
     {
-
-        ConsoleWrapper.WriteInfo("Received package!");
-        Console.WriteLine(packet);
-
-        if (packet.Command == "error")
-            Disconnect();
+        switch(packet.Command)
+        {
+            case PacketCommandEnum.Error:
+                Disconnect();
+                break;
+        }
 
         // mock async action after package receive (for example wait for user input or etc);
         Func<Task> mockedHandlingAction = async () => await Task.Delay(1000);

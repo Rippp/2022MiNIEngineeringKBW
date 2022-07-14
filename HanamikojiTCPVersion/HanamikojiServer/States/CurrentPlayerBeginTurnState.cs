@@ -9,20 +9,20 @@ namespace HanamikojiServer.States
     public class CurrentPlayerBeginTurnState : AbstractServerState
     {
         public CurrentPlayerBeginTurnState(HanamikojiGame game) : base(game) { }
+        public override void EnterState()
+        {
+            Console.WriteLine("Entered State: CurrentPlayerBeginTurnState");
+        }
 
         public override AbstractServerState DoWork()
         {
-            throw new NotImplementedException();
-        }
-
-        public override void EnterState()
-        {
-            throw new NotImplementedException();
+            // wyslanie do current player "Make move"
+            return null;
         }
 
         public override void ExitState()
         {
-            throw new NotImplementedException();
+            
         }
     }
 }

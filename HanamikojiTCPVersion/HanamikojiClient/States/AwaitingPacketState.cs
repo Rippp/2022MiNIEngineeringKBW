@@ -1,4 +1,5 @@
-﻿using CommonResources.Network;
+﻿using CommonResources.Game;
+using CommonResources.Network;
 
 namespace HanamikojiClient.States
 {
@@ -8,20 +9,26 @@ namespace HanamikojiClient.States
 
         public override void EnterState() 
         {
-            Console.WriteLine("Entered State: AwaitingFroGameDataState");
+            Console.WriteLine("Entered State: AwaitingPacketState");
         }
 
         public override AbstractClientState? DoWork()
         {
             var serverPacket = _client.ReadFromServer().GetAwaiter().GetResult();
 
-            if (serverPacket != null && serverPacket.Command == PacketCommandEnum.GameData)
+            if (serverPacket != null)
             {
                 _client.DisplayPacket(serverPacket);
-                return new PlayingAnimationsState(_client);
+                switch (serverPacket.Command)
+                {
+                    case PacketCommandEnum.GameData:
+                        _client.ProcessPlayerData(PlayerData.DeserializeFromJson(serverPacket.Message));
+                        return new PlayingAnimationsState(_client);
+
+                    case PacketCommandEnum.MakeMove:
+                        return new AwaitingUserMakeMoveState(_client);
+                }
             }
-            
-            // jezeli dostaniemy MakeMove ...
 
             return null;
         }

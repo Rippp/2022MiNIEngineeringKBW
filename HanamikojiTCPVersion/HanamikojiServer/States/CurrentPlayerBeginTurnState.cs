@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommonResources.Network;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,12 +13,12 @@ namespace HanamikojiServer.States
         public override void EnterState()
         {
             Console.WriteLine("Entered State: CurrentPlayerBeginTurnState");
+            _game.SendToCurrentPlayer(PacketCommandEnum.MakeMove);
         }
 
         public override AbstractServerState DoWork()
         {
-            // wyslanie do current player "Make move"
-            return null;
+            return new AwaitCurrentPlayerMoveState(_game);
         }
 
         public override void ExitState()

@@ -14,7 +14,6 @@ namespace HanamikojiServer
         public int RequiredPlayers = 2;
         private List<GiftCard> _cardDeck { get; set; }
 
-        private TcpGameServer _server;
         private TcpClient? _playerOneTcpClient;
         private TcpClient? _playerTwoTcpClient;
         private TcpClient? _currentPlayer;
@@ -29,9 +28,8 @@ namespace HanamikojiServer
         private AbstractServerState _currentState;
         private Random _random;
 
-        public HanamikojiGame(TcpGameServer server)
+        public HanamikojiGame()
         {
-            _server = server;
             _gameRunning = true;
             _playerOneData = new PlayerData();
             _playerTwoData = new PlayerData();
@@ -92,15 +90,13 @@ namespace HanamikojiServer
             return null;
         }
 
-        public void SendToCurrentPlayer(PacketCommandEnum command, string message)
+        public void SendToCurrentPlayer(PacketCommandEnum command, string message = "")
         =>
             SendToPlayer(_currentPlayer, command, message);
-        
 
-        public void SendToOtherPlayer(PacketCommandEnum command, string message)
+        public void SendToOtherPlayer(PacketCommandEnum command, string message = "")
         =>
             SendToPlayer(_otherPlayer, command, message);
-        
 
         public void SendToPlayer(TcpClient player, PacketCommandEnum command, string message)
         {
@@ -109,8 +105,6 @@ namespace HanamikojiServer
             PacketProcessing.SendPacket(player.GetStream(), new Packet(command, message))
                 .GetAwaiter().GetResult();
         }
-
-
 
         public void SwitchPlayer()
         {
@@ -149,7 +143,7 @@ namespace HanamikojiServer
             _gameRunning = false;
             Console.WriteLine($"[GAME {GameIdentifier}] : Stopping the Game because: {reason}");
         }
-       
+        
         private void DisconnectPlayer(TcpClient player)
         {
             if (player?.Connected ?? false)

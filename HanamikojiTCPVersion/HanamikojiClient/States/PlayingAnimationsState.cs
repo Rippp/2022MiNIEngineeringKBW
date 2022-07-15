@@ -17,7 +17,7 @@ namespace HanamikojiClient.States
         {
             Console.WriteLine("Entered State: PlayingAnimationsState");
             _startTime = DateTime.UtcNow;
-            _breakDuration = TimeSpan.FromMilliseconds(5000);
+            _breakDuration = TimeSpan.FromMilliseconds(3000);
         }
         
         public override AbstractClientState? DoWork()

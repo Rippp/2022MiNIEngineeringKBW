@@ -1,4 +1,5 @@
 ﻿using CommonResources;
+using CommonResources.Game;
 using CommonResources.Network;
 using HanamikojiClient.States;
 using System.Net.Sockets;
@@ -15,6 +16,7 @@ public class TcpGameClient
     private TcpClient _server;
     private NetworkStream _msgStream = null;
     private AbstractClientState? _currentState = null;
+    private PlayerData _playerData;
 
     public TcpGameClient(string serverAddress, int port)
     {
@@ -22,6 +24,7 @@ public class TcpGameClient
         Port = port;
         _server = new TcpClient();
         Running = false;
+        _playerData = new PlayerData();
     }
 
     public void ConnectToServer()
@@ -74,6 +77,7 @@ public class TcpGameClient
         _currentState = state;
         _currentState.EnterState();
     }
+    
     public async Task<Packet?> ReadFromServer()
     {
         try
@@ -92,16 +96,24 @@ public class TcpGameClient
 
         return null;
     }
+    
     public void SendToServer(PacketCommandEnum command, string message="")
     {
         PacketProcessing.SendPacket(_msgStream, new Packet(command, message))
             .GetAwaiter().GetResult();
     }
-
+    
+    public void ProcessPlayerData(PlayerData playerData)
+    {
+        _playerData = playerData;
+    }
+   
     public void DisplayPacket(Packet packet)
     {
         Console.WriteLine(packet.ToString());
     }
+
+    public PlayerData GetPlayerData() => _playerData;
 
     private async Task HandlePacket(Packet packet)
     {

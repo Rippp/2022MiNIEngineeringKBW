@@ -31,7 +31,7 @@ public class TcpGameServer
     public async Task Run()
     {
         Running = true;
-        _nextGame = new HanamikojiGame(this);
+        _nextGame = new HanamikojiGame();
 
         _newConnectionListener.Start();
         Console.WriteLine("Waiting for incoming connections...");
@@ -65,7 +65,7 @@ public class TcpGameServer
                 _games.Add(_nextGame);
                 _gameThreads.Add(gameThread);
 
-                _nextGame = new HanamikojiGame(this);
+                _nextGame = new HanamikojiGame();
             }
 
             Parallel.ForEach(_waitingLobby, (clientInLobby) =>

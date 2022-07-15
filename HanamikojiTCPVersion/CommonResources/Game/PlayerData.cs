@@ -6,12 +6,37 @@ namespace CommonResources.Game
     {
         public List<GiftCard> CardsOnHand { get; set; } = new List<GiftCard>();
 
-        public void ClearData() => CardsOnHand.Clear();
+        public Dictionary<PlayerMoveTypeEnum, bool> movesAvailability = new()
+        {
+            {PlayerMoveTypeEnum.DoubleGift, true},
+            {PlayerMoveTypeEnum.Secret, true},
+            {PlayerMoveTypeEnum.Elimination, true},
+            {PlayerMoveTypeEnum.Compromise, true}
+        };
+
+        public void ClearData()
+        {
+            CardsOnHand.Clear();
+            MakeAllMovesAvailable();
+        }
+
+        public List<PlayerMoveTypeEnum> GetAvailableMoves() => movesAvailability.Where(x => x.Value).Select(x => x.Key).ToList();
+
+        public bool IsMoveAvailable(PlayerMoveTypeEnum move) => movesAvailability[move];
+
+        public void MarkMoveAsNotAvailable(PlayerMoveTypeEnum move) => movesAvailability[move] = false;
+
+        public bool IsAnyMoveAvailable() => movesAvailability.Any(x => x.Value);
 
         public string SerializeToJson()
             => JsonConvert.SerializeObject(this);
 
         public static PlayerData DeserializeFromJson(string jsonData)
             => JsonConvert.DeserializeObject<PlayerData>(jsonData);
+        
+        private void MakeAllMovesAvailable()
+        {
+            foreach (var move in movesAvailability.Keys) movesAvailability[move] = true;
+        }
     }
 }

@@ -13,6 +13,7 @@ namespace HanamikojiServer.States
         public override void EnterState()
         {
             Console.WriteLine("Entered State: CurrentPlayerBeginTurnState");
+            
             _game.SendToCurrentPlayer(PacketCommandEnum.MakeMove);
         }
 

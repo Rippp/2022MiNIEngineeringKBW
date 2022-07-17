@@ -5,6 +5,9 @@ namespace CommonResources.Game
     public class PlayerData
     {
         public List<GiftCard> CardsOnHand { get; set; } = new List<GiftCard>();
+        public List<GiftCard> GiftsFromPlayer { get; set; } = new List<GiftCard>();
+        public GiftCard? SecretCard { get; set; } = null;
+        public List<GiftCard>? EliminationCards { get; set; } = null;
 
         public Dictionary<PlayerMoveTypeEnum, bool> movesAvailability = new()
         {

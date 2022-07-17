@@ -33,7 +33,7 @@ namespace HanamikojiClient.States
 
             _client.SendToServer(PacketCommandEnum.PlayerMove, _moveData.SerializeToJson());
 
-            return null;
+            return new AwaitingServerMoveValidationState(_client);
         }
 
         public override void ExitState()

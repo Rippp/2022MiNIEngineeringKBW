@@ -21,7 +21,7 @@ namespace HanamikojiServer.States
                 var moveData = MoveData.DeserializeFromJson(currentPlayerPacket.Message);
                 ConsoleWrapper.WriteInfo(moveData.MoveType.ToString());
                 ConsoleWrapper.ConsoleWriteCards(moveData.GiftCards, "Wybrane karty");
-                return null;
+                return new ValidateCurrentPlayerMoveState(_game, moveData);
             }
 
             return null;

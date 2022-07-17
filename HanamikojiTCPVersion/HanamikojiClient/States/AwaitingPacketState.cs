@@ -21,7 +21,7 @@ namespace HanamikojiClient.States
                 _client.DisplayPacket(serverPacket);
                 switch (serverPacket.Command)
                 {
-                    case PacketCommandEnum.GameData:
+                    case PacketCommandEnum.PlayerData:
                         _client.ProcessPlayerData(PlayerData.DeserializeFromJson(serverPacket.Message));
                         return new PlayingAnimationsState(_client);
 

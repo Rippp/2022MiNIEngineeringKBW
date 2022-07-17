@@ -115,8 +115,8 @@ namespace HanamikojiServer
 
         public void SendGameDataToPlayers()
         {
-            SendToCurrentPlayer(PacketCommandEnum.GameData, _currentPlayerData.SerializeToJson());
-            SendToOtherPlayer(PacketCommandEnum.GameData, _otherPlayerData.SerializeToJson());
+            SendToCurrentPlayer(PacketCommandEnum.PlayerData, _currentPlayerData.SerializeToJson());
+            SendToOtherPlayer(PacketCommandEnum.PlayerData, _otherPlayerData.SerializeToJson());
         }
 
         public void StartNewRound()
@@ -143,7 +143,11 @@ namespace HanamikojiServer
             _gameRunning = false;
             Console.WriteLine($"[GAME {GameIdentifier}] : Stopping the Game because: {reason}");
         }
+
+        public PlayerData GetCurrentPlayerData() => _currentPlayerData;
         
+        public PlayerData GetOtherPlayerData() => _otherPlayerData;
+
         private void DisconnectPlayer(TcpClient player)
         {
             if (player?.Connected ?? false)

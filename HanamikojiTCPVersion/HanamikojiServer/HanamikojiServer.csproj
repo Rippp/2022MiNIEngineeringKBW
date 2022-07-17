@@ -19,4 +19,8 @@
     <ProjectReference Include="..\CommonResources\CommonResources.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="States\MoveProcessingStates\" />
+  </ItemGroup>
+
 </Project>

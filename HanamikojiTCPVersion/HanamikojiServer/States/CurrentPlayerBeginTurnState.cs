@@ -9,17 +9,27 @@ namespace HanamikojiServer.States
 {
     public class CurrentPlayerBeginTurnState : AbstractServerState
     {
+        private bool _currentPlayerReady = false;
         public CurrentPlayerBeginTurnState(HanamikojiGame game) : base(game) { }
         public override void EnterState()
         {
             Console.WriteLine("Entered State: CurrentPlayerBeginTurnState");
-            
-            _game.SendToCurrentPlayer(PacketCommandEnum.MakeMove);
+
+            _game.DrawRandomCardsToCurrentPlayer(1); 
+            _game.SendToCurrentPlayer(PacketCommandEnum.PlayerData, _game.GetCurrentPlayerData().SerializeToJson());
         }
 
         public override AbstractServerState DoWork()
         {
-            return new AwaitCurrentPlayerMoveState(_game);
+            Packet currentPlayerPacket = null;
+
+            if (!_currentPlayerReady)
+                currentPlayerPacket = _game.ReadFromCurrentPlayer().GetAwaiter().GetResult();
+
+            if (currentPlayerPacket != null && currentPlayerPacket.Command == PacketCommandEnum.Ready)
+                return new AwaitCurrentPlayerMoveState(_game);
+
+            return null;
         }
 
         public override void ExitState()

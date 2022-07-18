@@ -115,6 +115,8 @@ public class TcpGameClient
 
     public PlayerData GetPlayerData() => _playerData;
 
+    public void AddGiftCardToHand(GiftCard cardToAdd) => _playerData.CardsOnHand.Add(cardToAdd);
+    
     private async Task HandlePacket(Packet packet)
     {
         switch(packet.Command)

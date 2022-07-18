@@ -10,6 +10,7 @@ namespace HanamikojiServer.States
         public override void EnterState()
         {
             Console.WriteLine("Entered State: AwaitCurrentPlayerMoveState");
+            _game.SendToCurrentPlayer(PacketCommandEnum.MakeMove);
         }
 
         public override AbstractServerState DoWork()

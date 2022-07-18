@@ -39,7 +39,7 @@ namespace HanamikojiServer.States
             }
 
             ValidateMove();
-            return new AwaitCurrentPlayerMoveState(_game);    // TEMPORARY, HERE WE SHOULD BEGIN MOVE PROCESSING
+            return new ExecuteMoveState(_game, _moveData);    // TEMPORARY, HERE WE SHOULD BEGIN MOVE PROCESSING
         }
 
         public override void ExitState()

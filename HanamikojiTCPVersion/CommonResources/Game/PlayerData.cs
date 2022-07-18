@@ -17,6 +17,8 @@ namespace CommonResources.Game
             {PlayerMoveTypeEnum.Compromise, true}
         };
 
+
+
         public void ClearData()
         {
             CardsOnHand.Clear();

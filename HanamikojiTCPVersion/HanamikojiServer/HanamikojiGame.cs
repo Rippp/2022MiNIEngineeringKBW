@@ -124,8 +124,8 @@ namespace HanamikojiServer
             _cardDeck = new List<GiftCard>(GiftCardConstants.AllCards);
             _currentPlayerData.ClearData();
             _otherPlayerData.ClearData();
-            _playerOneData.CardsOnHand.AddRange(GetRandomCards(6));
-            _playerTwoData.CardsOnHand.AddRange(GetRandomCards(6));
+            DrawRandomCardsToCurrentPlayer(6);
+            DrawRandomCardsToOtherPlayer(6);
         }
 
         public void ChangeState(AbstractServerState state)
@@ -147,6 +147,19 @@ namespace HanamikojiServer
         public PlayerData GetCurrentPlayerData() => _currentPlayerData;
         
         public PlayerData GetOtherPlayerData() => _otherPlayerData;
+
+        public void DrawRandomCardsToCurrentPlayer(int numberOfCards)
+        {
+            DrawRandomCardsToPlayer(_currentPlayerData, numberOfCards);
+        }
+
+        public void DrawRandomCardsToOtherPlayer(int numberOfCards)
+        {
+            DrawRandomCardsToPlayer(_otherPlayerData, numberOfCards);
+        }
+
+        public void DrawRandomCardsToPlayer(PlayerData playerData, int numberOfCards) => 
+            playerData.CardsOnHand.AddRange(GetRandomCards(numberOfCards));
 
         private void DisconnectPlayer(TcpClient player)
         {

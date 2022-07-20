@@ -2,35 +2,38 @@
 {
     public static class GiftCardConstants
     {
-        public static List<GiftCard> AllCards = new()
+        public static List<GiftCard> GetAllCards()
         {
-            new GiftCard(GeishaType.Geisha2_A),
-            new GiftCard(GeishaType.Geisha2_A),
+            return new()
+            {
+                new GiftCard(GeishaType.Geisha2_A, Guid.NewGuid()),
+                new GiftCard(GeishaType.Geisha2_A, Guid.NewGuid()),
 
-            new GiftCard(GeishaType.Geisha2_B),
-            new GiftCard(GeishaType.Geisha2_B),
+                new GiftCard(GeishaType.Geisha2_B, Guid.NewGuid()),
+                new GiftCard(GeishaType.Geisha2_B, Guid.NewGuid()),
 
-            new GiftCard(GeishaType.Geisha2_C),
-            new GiftCard(GeishaType.Geisha2_C),
+                new GiftCard(GeishaType.Geisha2_C, Guid.NewGuid()),
+                new GiftCard(GeishaType.Geisha2_C, Guid.NewGuid()),
 
-            new GiftCard(GeishaType.Geisha3_A),
-            new GiftCard(GeishaType.Geisha3_A),
-            new GiftCard(GeishaType.Geisha3_A),
+                new GiftCard(GeishaType.Geisha3_A, Guid.NewGuid()),
+                new GiftCard(GeishaType.Geisha3_A, Guid.NewGuid()),
+                new GiftCard(GeishaType.Geisha3_A, Guid.NewGuid()),
 
-            new GiftCard(GeishaType.Geisha3_B),
-            new GiftCard(GeishaType.Geisha3_B),
-            new GiftCard(GeishaType.Geisha3_B),
+                new GiftCard(GeishaType.Geisha3_B, Guid.NewGuid()),
+                new GiftCard(GeishaType.Geisha3_B, Guid.NewGuid()),
+                new GiftCard(GeishaType.Geisha3_B, Guid.NewGuid()),
 
-            new GiftCard(GeishaType.Geisha4_A),
-            new GiftCard(GeishaType.Geisha4_A),
-            new GiftCard(GeishaType.Geisha4_A),
-            new GiftCard(GeishaType.Geisha4_A),
+                new GiftCard(GeishaType.Geisha4_A, Guid.NewGuid()),
+                new GiftCard(GeishaType.Geisha4_A, Guid.NewGuid()),
+                new GiftCard(GeishaType.Geisha4_A, Guid.NewGuid()),
+                new GiftCard(GeishaType.Geisha4_A, Guid.NewGuid()),
 
-            new GiftCard(GeishaType.Geisha5_A),
-            new GiftCard(GeishaType.Geisha5_A),
-            new GiftCard(GeishaType.Geisha5_A),
-            new GiftCard(GeishaType.Geisha5_A),
-            new GiftCard(GeishaType.Geisha5_A)
-        };
+                new GiftCard(GeishaType.Geisha5_A, Guid.NewGuid()),
+                new GiftCard(GeishaType.Geisha5_A, Guid.NewGuid()),
+                new GiftCard(GeishaType.Geisha5_A, Guid.NewGuid()),
+                new GiftCard(GeishaType.Geisha5_A, Guid.NewGuid()),
+                new GiftCard(GeishaType.Geisha5_A, Guid.NewGuid())
+            };
+        }
     }
 }

@@ -1,9 +1,4 @@
 ﻿using CommonResources.Network;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HanamikojiServer.States
 {
@@ -14,7 +9,7 @@ namespace HanamikojiServer.States
         public CurrentPlayerEndTurnState(HanamikojiGame game) : base(game) { }
         public override void EnterState()
         {
-            Console.WriteLine("Entered State: EndCurrentPlayerTurnState");
+            Console.WriteLine("Entered State: CurrentPlayerEndTurnState");
             _game.SwitchPlayer();
             _game.SendGameDataToPlayers();
         }

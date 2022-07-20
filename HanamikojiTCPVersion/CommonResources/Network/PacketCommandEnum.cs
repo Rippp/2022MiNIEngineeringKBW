@@ -2,7 +2,7 @@
 {
     public enum PacketCommandEnum
     {
-        PlayerData,              // Packet contains PlayerData
+        GameState,               // Packet contains GameState
         Message,                 // Packet with message to display
         Error,                   // Packet with error to handle
         Ready,                   // Sent by Player to Server 

@@ -17,8 +17,6 @@ namespace CommonResources.Game
             {PlayerMoveTypeEnum.Compromise, true}
         };
 
-
-
         public void ClearData()
         {
             CardsOnHand.Clear();
@@ -39,6 +37,22 @@ namespace CommonResources.Game
         public static PlayerData DeserializeFromJson(string jsonData)
             => JsonConvert.DeserializeObject<PlayerData>(jsonData);
         
+        public PlayerData AnonimizeData()
+        {
+            var anonimizedData = new PlayerData();
+
+            anonimizedData.CardsOnHand = CardsOnHand.Select(x => new GiftCard(GeishaType.AnonimizedGeisha, x.CardId)).ToList();
+            anonimizedData.GiftsFromPlayer = GiftsFromPlayer;
+            anonimizedData.SecretCard = SecretCard == null ? null : new GiftCard(GeishaType.AnonimizedGeisha, SecretCard.CardId);
+            anonimizedData.EliminationCards = EliminationCards == null ? 
+                null : EliminationCards.Select(x => new GiftCard(GeishaType.AnonimizedGeisha, x.CardId)).ToList();
+
+            return anonimizedData;
+        }
+
+        public int CountPointsForGeishaType(GeishaType geishaType) =>
+            GiftsFromPlayer.Count(card => card.Type == geishaType);
+
         private void MakeAllMovesAvailable()
         {
             foreach (var move in movesAvailability.Keys) movesAvailability[move] = true;

@@ -1,11 +1,6 @@
 ﻿using CommonResources;
 using CommonResources.Game;
 using CommonResources.Network;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HanamikojiClient.States
 {
@@ -27,9 +22,9 @@ namespace HanamikojiClient.States
         {
             var serverPacket = _client.ReadFromServer().GetAwaiter().GetResult();
 
-            if (serverPacket != null && serverPacket.Command == PacketCommandEnum.PlayerData)
+            if (serverPacket != null && serverPacket.Command == PacketCommandEnum.GameState)
             {
-                _client.ProcessPlayerData(PlayerData.DeserializeFromJson(serverPacket.Message));
+                _client.ProcessGameData(GameData.DeserializeFromJson(serverPacket.Message));
                 return new AwaitingUserMakeMoveState(_client);
             }
 

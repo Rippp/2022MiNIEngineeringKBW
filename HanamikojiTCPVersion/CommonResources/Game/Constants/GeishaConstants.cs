@@ -22,6 +22,7 @@
             { GeishaType.Geisha3_B, ConsoleColor.Cyan },
             { GeishaType.Geisha4_A, ConsoleColor.Green },
             { GeishaType.Geisha5_A, ConsoleColor.Magenta},
+            { GeishaType.AnonimizedGeisha, ConsoleColor.White }
         };
     }
 }

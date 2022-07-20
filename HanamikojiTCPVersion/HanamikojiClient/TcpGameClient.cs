@@ -16,7 +16,7 @@ public class TcpGameClient
     private TcpClient _server;
     private NetworkStream _msgStream = null;
     private AbstractClientState? _currentState = null;
-    private PlayerData _playerData;
+    private GameData _gameData;
 
     public TcpGameClient(string serverAddress, int port)
     {
@@ -24,7 +24,7 @@ public class TcpGameClient
         Port = port;
         _server = new TcpClient();
         Running = false;
-        _playerData = new PlayerData();
+        _gameData = new GameData(new PlayerData(), new PlayerData());
     }
 
     public void ConnectToServer()
@@ -103,9 +103,9 @@ public class TcpGameClient
             .GetAwaiter().GetResult();
     }
     
-    public void ProcessPlayerData(PlayerData playerData)
+    public void ProcessGameData(GameData gameData)
     {
-        _playerData = playerData;
+        _gameData = gameData;
     }
    
     public void DisplayPacket(Packet packet)
@@ -113,9 +113,9 @@ public class TcpGameClient
         Console.WriteLine(packet.ToString());
     }
 
-    public PlayerData GetPlayerData() => _playerData;
+    public GameData GetGameData() => _gameData;
 
-    public void AddGiftCardToHand(GiftCard cardToAdd) => _playerData.CardsOnHand.Add(cardToAdd);
+    public void AddGiftCardToHand(GiftCard cardToAdd) => _gameData.CurrentPlayerData.CardsOnHand.Add(cardToAdd);
     
     private async Task HandlePacket(Packet packet)
     {

@@ -9,5 +9,6 @@
         Geisha3_B,
         Geisha4_A,
         Geisha5_A,
+        AnonimizedGeisha
     }
 }

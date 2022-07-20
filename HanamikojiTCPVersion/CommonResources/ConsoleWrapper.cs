@@ -8,6 +8,10 @@ namespace CommonResources
     {
         public static Func<GiftCard, string> GiftCardStyleFunc =
             (card) => $"[{GeishaConstants.GeishaConsoleColors[card.Type]}]{card}[/]";
+        
+        public static Func<GeishaType, string> GeishaStyleFunc =
+            (geishaType) => $"[{GeishaConstants.GeishaConsoleColors[geishaType]}]{geishaType}[/]";
+
 
         public static void WriteError(string errorMessage)
         {
@@ -81,5 +85,44 @@ namespace CommonResources
         }
         public static void ConsoleWriteCards(IReadOnlyList<GiftCard> cards, string title)
             => AnsiConsole.Write(GetCardsTable(cards, title));
+
+        public static void PrintGeishaStates(PlayerData playerOneData, PlayerData playerTwoData, string playerOneName, string playerTwoName)
+        {
+            AnsiConsole.Clear();
+            var table = new Table();
+
+            table.AddColumn(new TableColumn("Player Name"));
+            foreach (var geishaType in Enum.GetValues<GeishaType>())
+            {
+                table.AddColumn(new TableColumn(GeishaStyleFunc(geishaType)).Centered());
+            }
+
+            var playerOnePointsPanels = new List<Panel>();
+            var playerTwoPointsPanels = new List<Panel>();
+            var convincedToPlayerPanels = new List<Panel>();
+
+
+            playerOnePointsPanels.Add(new Panel(playerOneName));
+            playerTwoPointsPanels.Add(new Panel(playerTwoName));
+            convincedToPlayerPanels.Add(new Panel("Convinced to player"));
+
+
+            foreach (var geishaType in Enum.GetValues<GeishaType>())
+            {
+                var playerOnePanel = new Panel($"{playerOneData.CountPointsForGeishaType(geishaType)}");
+                var playerTwoPanel = new Panel($"{playerTwoData.CountPointsForGeishaType(geishaType)}");
+                // var convincedToPlayerPanel = new Panel(convincedToPlayerDict[geishaType]?.ToString() ?? "---");
+
+                playerOnePointsPanels.Add(playerOnePanel);
+                playerTwoPointsPanels.Add(playerTwoPanel);
+                // convincedToPlayerPanels.Add(convincedToPlayerPanel);
+            }
+
+            table.AddRow(playerOnePointsPanels);
+            table.AddRow(playerTwoPointsPanels);
+            table.AddRow(convincedToPlayerPanels);
+
+            AnsiConsole.Write(table);
+        }
     }
 }

@@ -115,13 +115,30 @@ namespace HanamikojiServer
 
         public void SendGameDataToPlayers()
         {
-            SendToCurrentPlayer(PacketCommandEnum.PlayerData, _currentPlayerData.SerializeToJson());
-            SendToOtherPlayer(PacketCommandEnum.PlayerData, _otherPlayerData.SerializeToJson());
+            SendGameDataToCurrentPlayer();
+            SendGameDataToOtherPlayer();
         }
+
+        public void SendGameDataToCurrentPlayer() =>
+            SendToCurrentPlayer(PacketCommandEnum.GameState, (new GameData(_currentPlayerData, _otherPlayerData)).SerializeToJson());
+
+        public void SendGameDataToOtherPlayer() =>
+            SendToOtherPlayer(PacketCommandEnum.GameState, (new GameData(_otherPlayerData, _currentPlayerData)).SerializeToJson());
+
+        public void SendCompromiseOfferToOtherPlayer(List<GiftCard> compromiseCardsToOffer)
+        {
+            var gameStateToSend = new GameData(_otherPlayerData, _currentPlayerData,
+                new List<PlayerMoveTypeEnum> { PlayerMoveTypeEnum.CompromiseOffer });
+
+            gameStateToSend.SetCompromiseCards(compromiseCardsToOffer);
+
+            SendToOtherPlayer(PacketCommandEnum.GameState, gameStateToSend.SerializeToJson());
+        }
+            
 
         public void StartNewRound()
         {
-            _cardDeck = new List<GiftCard>(GiftCardConstants.AllCards);
+            _cardDeck = new List<GiftCard>(GiftCardConstants.GetAllCards());
             _currentPlayerData.ClearData();
             _otherPlayerData.ClearData();
             DrawRandomCardsToCurrentPlayer(6);
@@ -132,7 +149,7 @@ namespace HanamikojiServer
         {
             if (state == null) return;
 
-            if(_currentState != null)
+            if (_currentState != null)
                 _currentState.ExitState();
             _currentState = state;
             _currentState.EnterState();
@@ -145,7 +162,7 @@ namespace HanamikojiServer
         }
 
         public PlayerData GetCurrentPlayerData() => _currentPlayerData;
-        
+
         public PlayerData GetOtherPlayerData() => _otherPlayerData;
 
         public void DrawRandomCardsToCurrentPlayer(int numberOfCards)
@@ -158,7 +175,7 @@ namespace HanamikojiServer
             DrawRandomCardsToPlayer(_otherPlayerData, numberOfCards);
         }
 
-        public void DrawRandomCardsToPlayer(PlayerData playerData, int numberOfCards) => 
+        public void DrawRandomCardsToPlayer(PlayerData playerData, int numberOfCards) =>
             playerData.CardsOnHand.AddRange(GetRandomCards(numberOfCards));
 
         private void DisconnectPlayer(TcpClient player)

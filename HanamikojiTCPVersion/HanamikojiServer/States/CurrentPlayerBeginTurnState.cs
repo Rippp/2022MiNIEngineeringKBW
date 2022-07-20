@@ -15,8 +15,8 @@ namespace HanamikojiServer.States
         {
             Console.WriteLine("Entered State: CurrentPlayerBeginTurnState");
 
-            _game.DrawRandomCardsToCurrentPlayer(1); 
-            _game.SendToCurrentPlayer(PacketCommandEnum.PlayerData, _game.GetCurrentPlayerData().SerializeToJson());
+            _game.DrawRandomCardsToCurrentPlayer(1);
+            _game.SendGameDataToCurrentPlayer();
         }
 
         public override AbstractServerState DoWork()

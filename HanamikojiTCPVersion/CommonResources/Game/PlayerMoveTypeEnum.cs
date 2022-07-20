@@ -6,7 +6,9 @@
         Secret,
         DoubleGift,
         Compromise,
-        DoubleGiftAnswer,
-        CompromiseAnswer
+        DoubleGiftOffer,
+        CompromiseOffer,
+        DoubleGiftResponse,
+        CompromiseResponse
     }
 }

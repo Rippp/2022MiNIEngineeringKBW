@@ -8,7 +8,7 @@ namespace HanamikojiServer.States
     {
         private readonly MoveData _moveData;
         private PlayerData _currentPlayerData;
-        public ValidateCurrentPlayerMoveState(HanamikojiGame game, MoveData moveData) : base(game) 
+        public ValidateCurrentPlayerMoveState(HanamikojiGame game, MoveData moveData) : base(game)
         {
             _moveData = moveData;
         }
@@ -26,7 +26,7 @@ namespace HanamikojiServer.States
                 return new AwaitCurrentPlayerMoveState(_game);
             }
 
-            if(!CheckIfReceivedCardsAreAvailableInHand(_moveData.GiftCards))
+            if (!CheckIfReceivedCardsAreAvailableInHand(_moveData.GiftCards))
             {
                 InvalidateMove("Move contains cards that are not in current player's hand");
                 return new AwaitCurrentPlayerMoveState(_game);
@@ -39,7 +39,7 @@ namespace HanamikojiServer.States
             }
 
             ValidateMove();
-            return new ExecuteMoveState(_game, _moveData);    // TEMPORARY, HERE WE SHOULD BEGIN MOVE PROCESSING
+            return new ExecuteCurrentPlayerMoveState(_game, _moveData);    // TEMPORARY, HERE WE SHOULD BEGIN MOVE PROCESSING
         }
 
         public override void ExitState()
@@ -49,19 +49,13 @@ namespace HanamikojiServer.States
 
         private bool CheckIfMoveContainsRightAmountOfCards(PlayerMoveTypeEnum moveType, int cardsReceived)
         {
-            switch(moveType)
+            switch (moveType)
             {
                 case PlayerMoveTypeEnum.Compromise:
                     return cardsReceived == 3;
 
-                case PlayerMoveTypeEnum.CompromiseAnswer:
-                    return cardsReceived == 1;
-
                 case PlayerMoveTypeEnum.DoubleGift:
                     return cardsReceived == 4;
-
-                case PlayerMoveTypeEnum.DoubleGiftAnswer:
-                    return cardsReceived == 2;
 
                 case PlayerMoveTypeEnum.Elimination:
                     return cardsReceived == 2;
@@ -73,7 +67,7 @@ namespace HanamikojiServer.States
             return false;
         }
 
-        private bool CheckIfMoveAvailable(PlayerMoveTypeEnum playerMove) => 
+        private bool CheckIfMoveAvailable(PlayerMoveTypeEnum playerMove) =>
             _currentPlayerData.movesAvailability[playerMove];
 
         private bool CheckIfReceivedCardsAreAvailableInHand(List<GiftCard> moveCards)
@@ -83,14 +77,14 @@ namespace HanamikojiServer.States
             foreach (var geishaType in moveGiftCardsGroupped)
                 if (geishaType.Count > _currentPlayerData.CardsOnHand.Where(x => x.Type == x.Type).Count())
                     return false;
-            
+
             return true;
         }
 
         private void InvalidateMove(string error)
         {
             _game.SendToCurrentPlayer(PacketCommandEnum.MoveInvalid, error);
-            _game.SendToCurrentPlayer(PacketCommandEnum.PlayerData, _game.GetCurrentPlayerData().SerializeToJson());
+            _game.SendGameDataToCurrentPlayer();
         }
 
         private void ValidateMove()

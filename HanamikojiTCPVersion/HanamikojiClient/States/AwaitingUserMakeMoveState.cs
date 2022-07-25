@@ -49,17 +49,17 @@ namespace HanamikojiClient.States
 
         private void HandleDoubleGiftOffer()
         {
-            _moveData.MoveType = PlayerMoveTypeEnum.CompromiseResponse;
+            _moveData.MoveType = PlayerMoveTypeEnum.DoubleGiftResponse;
 
             var pairs = new List<(GiftCard card1, GiftCard card2)>() {
                 (_gameData.DoubleGiftCards[0], _gameData.DoubleGiftCards[1]),
                 (_gameData.DoubleGiftCards[2], _gameData.DoubleGiftCards[3]),
             };
 
-            var selectedCard = ConsoleWrapper.PromptSingleSelection(pairs,
-                customTitle: "Choose compromise card: ", optionStyleFunction: ConsoleWrapper.GiftCardPairStyleFunc);
+            var selectedPair = ConsoleWrapper.PromptSingleSelection(pairs,
+                customTitle: "Choose double gift card pair: ", optionStyleFunction: ConsoleWrapper.GiftCardPairStyleFunc);
 
-            _moveData.GiftCards = new List<GiftCard>() { selectedCard.card1, selectedCard.card2 };
+            _moveData.GiftCards = new List<GiftCard>() { selectedPair.card1, selectedPair.card2 };
         }
 
         private void HandleRegularMove()

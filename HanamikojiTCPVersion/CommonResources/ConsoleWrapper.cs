@@ -10,8 +10,8 @@ namespace CommonResources
             (card) => $"[{GeishaConstants.GeishaConsoleColors[card.Type]}]{card}[/]";
 
         public static Func<(GiftCard card1, GiftCard card2), string> GiftCardPairStyleFunc =
-            (pair) => $@"[{GeishaConstants.GeishaConsoleColors[pair.card2.Type]}]{pair.card2}[/], 
-                    {GeishaConstants.GeishaConsoleColors[pair.card2.Type]}]{pair.card2}[/]";
+            (pair) => $"[{GeishaConstants.GeishaConsoleColors[pair.card1.Type]}]{pair.card1}[/], " +
+                $"[{GeishaConstants.GeishaConsoleColors[pair.card2.Type]}]{pair.card2}[/]";
 
         public static Func<GeishaType, string> GeishaStyleFunc =
             (geishaType) => $"[{GeishaConstants.GeishaConsoleColors[geishaType]}]{geishaType}[/]";

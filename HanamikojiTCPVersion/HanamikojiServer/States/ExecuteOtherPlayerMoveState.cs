@@ -30,16 +30,13 @@ namespace HanamikojiServer.States
             switch (_moveData.MoveType)
             {
                 case PlayerMoveTypeEnum.CompromiseResponse:
-                    _otherPlayerData.GiftsFromPlayer.AddRange(_moveData.AnswerGiftCards);
-                    _currentPlayerData.GiftsFromPlayer.AddRange(_moveData.GiftCards
-                        .Where(x => x.CardId != _moveData.AnswerGiftCards.First().CardId));
-                    break;
                 case PlayerMoveTypeEnum.DoubleGiftResponse:
                     _otherPlayerData.GiftsFromPlayer.AddRange(_moveData.AnswerGiftCards);
                     _currentPlayerData.GiftsFromPlayer.AddRange(_moveData.GiftCards
-                        .Where(x => x.CardId != _moveData.AnswerGiftCards.First().CardId));
+                        .Where(x => !_moveData.AnswerGiftCards.Any(y => x.CardId == y.CardId)));
                     break;
-
+                default:
+                    return null;
             }
 
             return new CurrentPlayerEndTurnState(_game);

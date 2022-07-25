@@ -59,13 +59,13 @@ namespace HanamikojiServer.States
         private void ExecuteCompromiseMove()
         {
             foreach (var card in _moveData.GiftCards) RemoveCardFromCurrentPlayerHand(card);
-            _game.SendMoveOfferToOtherPlayer(PlayerMoveTypeEnum.CompromiseOffer, _moveData.GiftCards);
+            _game.SendCompromiseOfferToOtherPlayer(_moveData.GiftCards);
         }
 
         private void ExecuteDoubleGiftMove()
         {
             foreach (var card in _moveData.GiftCards) RemoveCardFromCurrentPlayerHand(card);
-            _game.SendMoveOfferToOtherPlayer(PlayerMoveTypeEnum.DoubleGiftOffer, _moveData.GiftCards);
+            _game.SendDoubleGiftOfferToOtherPlayer(_moveData.GiftCards);
         }
 
         private void ExecuteSecretMove()

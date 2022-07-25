@@ -8,7 +8,7 @@ namespace HanamikojiServer.States
         private readonly PlayerData _currentPlayerData;
         private bool _moveExecuted = false;
 
-        public ExecuteCurrentPlayerMoveState(HanamikojiGame game, MoveData moveData) : base(game) 
+        public ExecuteCurrentPlayerMoveState(HanamikojiGame game, MoveData moveData) : base(game)
         {
             _moveData = moveData;
             _currentPlayerData = _game.GetCurrentPlayerData();
@@ -18,7 +18,7 @@ namespace HanamikojiServer.States
         {
             Console.WriteLine("Entered State: ExecuteMoveState");
 
-            switch(_moveData.MoveType)
+            switch (_moveData.MoveType)
             {
                 case PlayerMoveTypeEnum.Secret:
                     ExecuteSecretMove();
@@ -32,6 +32,10 @@ namespace HanamikojiServer.States
                     ExecuteCompromiseMove();
                     break;
 
+                case PlayerMoveTypeEnum.DoubleGift:
+                    ExecuteDoubleGiftMove();
+                    break;
+
                 default:
                     break;
             }
@@ -41,7 +45,7 @@ namespace HanamikojiServer.States
 
         public override AbstractServerState? DoWork()
         {
-            if (_moveExecuted) 
+            if (_moveExecuted)
                 return new CurrentPlayerEndTurnState(_game);
 
             return new AwaitOtherPlayerMoveState(_game, _moveData);
@@ -55,7 +59,13 @@ namespace HanamikojiServer.States
         private void ExecuteCompromiseMove()
         {
             foreach (var card in _moveData.GiftCards) RemoveCardFromCurrentPlayerHand(card);
-            _game.SendCompromiseOfferToOtherPlayer(_moveData.GiftCards);
+            _game.SendMoveOfferToOtherPlayer(PlayerMoveTypeEnum.CompromiseOffer, _moveData.GiftCards);
+        }
+
+        private void ExecuteDoubleGiftMove()
+        {
+            foreach (var card in _moveData.GiftCards) RemoveCardFromCurrentPlayerHand(card);
+            _game.SendMoveOfferToOtherPlayer(PlayerMoveTypeEnum.DoubleGiftOffer, _moveData.GiftCards);
         }
 
         private void ExecuteSecretMove()
@@ -72,7 +82,8 @@ namespace HanamikojiServer.States
             _moveExecuted = true;
         }
 
-        private void RemoveCardFromCurrentPlayerHand(GiftCard cardToRemove) 
+
+        private void RemoveCardFromCurrentPlayerHand(GiftCard cardToRemove)
             => _currentPlayerData.CardsOnHand
             .RemoveAt(_currentPlayerData.CardsOnHand.FindIndex(x => x.Type == cardToRemove.Type));
     }

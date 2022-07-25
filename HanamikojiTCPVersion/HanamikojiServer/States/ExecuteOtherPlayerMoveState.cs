@@ -13,7 +13,7 @@ namespace HanamikojiServer.States
         private readonly MoveData _moveData;
         private PlayerData _currentPlayerData;
         private PlayerData _otherPlayerData;
-        public ExecuteOtherPlayerMoveState(HanamikojiGame game, MoveData moveData) : base(game) 
+        public ExecuteOtherPlayerMoveState(HanamikojiGame game, MoveData moveData) : base(game)
         {
             _moveData = moveData;
         }
@@ -34,6 +34,12 @@ namespace HanamikojiServer.States
                     _currentPlayerData.GiftsFromPlayer.AddRange(_moveData.GiftCards
                         .Where(x => x.CardId != _moveData.AnswerGiftCards.First().CardId));
                     break;
+                case PlayerMoveTypeEnum.DoubleGiftResponse:
+                    _otherPlayerData.GiftsFromPlayer.AddRange(_moveData.AnswerGiftCards);
+                    _currentPlayerData.GiftsFromPlayer.AddRange(_moveData.GiftCards
+                        .Where(x => x.CardId != _moveData.AnswerGiftCards.First().CardId));
+                    break;
+
             }
 
             return new CurrentPlayerEndTurnState(_game);

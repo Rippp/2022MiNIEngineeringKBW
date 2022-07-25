@@ -8,7 +8,7 @@ namespace CommonResources.Game
         public PlayerData OtherPlayerData { get; set; }
         public List<PlayerMoveTypeEnum> MovesAvailable { get; set; } = new List<PlayerMoveTypeEnum>();
         public List<GiftCard>? CompromiseCards { get; set; }
-        public List<(GiftCard firstCard, GiftCard secondCard)>? DoubleGiftCards { get; set; }
+        public List<GiftCard>? DoubleGiftCards { get; set; }
 
         public GameData(PlayerData currentPlayerData, PlayerData otherPlayerData, List<PlayerMoveTypeEnum>? movesAvailable = null)
         {
@@ -20,8 +20,8 @@ namespace CommonResources.Game
         public void SetCompromiseCards(List<GiftCard> compromiseCards) =>
             CompromiseCards = new List<GiftCard>(compromiseCards);
 
-        public void SetDoubleGiftCards(List<(GiftCard firstCard, GiftCard secondCard)> doubleGiftCards) =>
-            DoubleGiftCards = new List<(GiftCard firstCard, GiftCard secondCard)>(doubleGiftCards);
+        public void SetDoubleGiftCards(List<GiftCard> doubleGiftCards) =>
+            DoubleGiftCards = new List<GiftCard>(doubleGiftCards);
 
         public string SerializeToJson()
             => JsonConvert.SerializeObject(this);

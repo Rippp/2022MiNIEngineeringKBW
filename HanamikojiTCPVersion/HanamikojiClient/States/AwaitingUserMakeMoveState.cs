@@ -17,13 +17,15 @@ namespace HanamikojiClient.States
             _gameData = _client.GetGameData();
             _moveData = new MoveData();
         }
-        
+
         public override AbstractClientState? DoWork()
         {
             PrintGameState();
 
             if (_gameData.MovesAvailable.Contains(PlayerMoveTypeEnum.CompromiseOffer))
                 HandleCompromiseOffer();
+            else if (_gameData.MovesAvailable.Contains(PlayerMoveTypeEnum.DoubleGiftOffer))
+                HandleDoubleGiftOffer();
             else
                 HandleRegularMove();
 
@@ -44,6 +46,22 @@ namespace HanamikojiClient.States
 
             _moveData.GiftCards = new List<GiftCard>() { selectedCard };
         }
+
+        private void HandleDoubleGiftOffer()
+        {
+            _moveData.MoveType = PlayerMoveTypeEnum.CompromiseResponse;
+
+            var pairs = new List<(GiftCard card1, GiftCard card2)>() {
+                (_gameData.DoubleGiftCards[0], _gameData.DoubleGiftCards[1]),
+                (_gameData.DoubleGiftCards[2], _gameData.DoubleGiftCards[3]),
+            };
+
+            var selectedCard = ConsoleWrapper.PromptSingleSelection(pairs,
+                customTitle: "Choose compromise card: ", optionStyleFunction: ConsoleWrapper.GiftCardPairStyleFunc);
+
+            _moveData.GiftCards = new List<GiftCard>() { selectedCard.card1, selectedCard.card2 };
+        }
+
         private void HandleRegularMove()
         {
             var selectedMoveType = ConsoleWrapper.PromptSingleSelection(_gameData.MovesAvailable, customTitle: "Select move:");
@@ -56,18 +74,18 @@ namespace HanamikojiClient.States
 
         private int GetNumberOfCardsToChoose(PlayerMoveTypeEnum playerMoveType)
         {
-            switch(playerMoveType)
+            switch (playerMoveType)
             {
-                case PlayerMoveTypeEnum.Elimination:
-                    return 2;
-                case PlayerMoveTypeEnum.DoubleGift:
-                    return 4;
                 case PlayerMoveTypeEnum.Secret:
                     return 1;
+                case PlayerMoveTypeEnum.Elimination:
+                    return 2;
                 case PlayerMoveTypeEnum.Compromise:
                     return 3;
+                case PlayerMoveTypeEnum.DoubleGift:
+                    return 4;
             }
-            return 0;   
+            return 0;
         }
 
         private void PrintGameState()

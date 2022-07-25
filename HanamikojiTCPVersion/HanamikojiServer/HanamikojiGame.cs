@@ -125,7 +125,7 @@ namespace HanamikojiServer
         public void SendGameDataToOtherPlayer() =>
             SendToOtherPlayer(PacketCommandEnum.GameState, (new GameData(_otherPlayerData, _currentPlayerData)).SerializeToJson());
 
-        public void SendCompromiseOfferToOtherPlayer(List<GiftCard> compromiseCardsToOffer)
+        public void SendMoveOfferToOtherPlayer(PlayerMoveTypeEnum moveType, List<GiftCard> compromiseCardsToOffer)
         {
             var gameStateToSend = new GameData(_otherPlayerData, _currentPlayerData,
                 new List<PlayerMoveTypeEnum> { PlayerMoveTypeEnum.CompromiseOffer });
@@ -134,7 +134,6 @@ namespace HanamikojiServer
 
             SendToOtherPlayer(PacketCommandEnum.GameState, gameStateToSend.SerializeToJson());
         }
-            
 
         public void StartNewRound()
         {

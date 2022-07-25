@@ -51,17 +51,17 @@ namespace HanamikojiServer.States
         {
             switch (moveType)
             {
+                case PlayerMoveTypeEnum.Secret:
+                    return cardsReceived == 1;
+
+                case PlayerMoveTypeEnum.Elimination:
+                    return cardsReceived == 2;
+
                 case PlayerMoveTypeEnum.Compromise:
                     return cardsReceived == 3;
 
                 case PlayerMoveTypeEnum.DoubleGift:
                     return cardsReceived == 4;
-
-                case PlayerMoveTypeEnum.Elimination:
-                    return cardsReceived == 2;
-
-                case PlayerMoveTypeEnum.Secret:
-                    return cardsReceived == 1;
             }
 
             return false;

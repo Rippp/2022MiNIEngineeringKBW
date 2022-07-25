@@ -27,7 +27,8 @@ namespace HanamikojiServer.States
         {
             _game.SendToOtherPlayer(PacketCommandEnum.MoveVerified);
 
-            return new ExecuteOtherPlayerMoveState(_game, new MoveData {
+            return new ExecuteOtherPlayerMoveState(_game, new MoveData
+            {
                 MoveType = _otherPlayerMoveData.MoveType,
                 GiftCards = _currentPlayerMoveData.GiftCards,
                 AnswerGiftCards = _otherPlayerMoveData.GiftCards
@@ -37,6 +38,20 @@ namespace HanamikojiServer.States
         public override void ExitState()
         {
 
+        }
+
+        private bool CheckIfMoveContainsRightAmountOfCards(PlayerMoveTypeEnum moveType, int cardsReceived)
+        {
+            switch (moveType)
+            {
+                case PlayerMoveTypeEnum.CompromiseResponse:
+                    return cardsReceived == 1;
+
+                case PlayerMoveTypeEnum.DoubleGiftResponse:
+                    return cardsReceived == 2;
+            }
+
+            return false;
         }
     }
 }

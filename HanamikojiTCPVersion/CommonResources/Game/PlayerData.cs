@@ -36,7 +36,7 @@ namespace CommonResources.Game
 
         public static PlayerData DeserializeFromJson(string jsonData)
             => JsonConvert.DeserializeObject<PlayerData>(jsonData);
-        
+
         public PlayerData AnonimizeData()
         {
             var anonimizedData = new PlayerData();
@@ -44,7 +44,7 @@ namespace CommonResources.Game
             anonimizedData.CardsOnHand = CardsOnHand.Select(x => new GiftCard(GeishaType.AnonimizedGeisha, x.CardId)).ToList();
             anonimizedData.GiftsFromPlayer = GiftsFromPlayer;
             anonimizedData.SecretCard = SecretCard == null ? null : new GiftCard(GeishaType.AnonimizedGeisha, SecretCard.CardId);
-            anonimizedData.EliminationCards = EliminationCards == null ? 
+            anonimizedData.EliminationCards = EliminationCards == null ?
                 null : EliminationCards.Select(x => new GiftCard(GeishaType.AnonimizedGeisha, x.CardId)).ToList();
 
             return anonimizedData;

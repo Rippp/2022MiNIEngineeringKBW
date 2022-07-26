@@ -13,7 +13,7 @@ namespace CommonResources.Game
         public GameData(PlayerData currentPlayerData, PlayerData otherPlayerData, List<PlayerMoveTypeEnum>? movesAvailable = null)
         {
             CurrentPlayerData = currentPlayerData;
-            OtherPlayerData = otherPlayerData.AnonimizeData();
+            OtherPlayerData = otherPlayerData;
             MovesAvailable = movesAvailable ?? currentPlayerData.GetAvailableMoves();
         }
 

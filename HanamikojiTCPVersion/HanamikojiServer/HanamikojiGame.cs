@@ -4,6 +4,7 @@ using CommonResources.Game.Constants;
 using CommonResources.Network;
 using HanamikojiServer.States;
 using System.Net.Sockets;
+using HanamikojiServer.Utils;
 
 namespace HanamikojiServer
 {
@@ -25,8 +26,10 @@ namespace HanamikojiServer
         private PlayerData _otherPlayerData => _currentPlayerData == _playerOneData ? _playerTwoData : _playerOneData;
 
         private bool _gameRunning;
-        private AbstractServerState _currentState;
         private Random _random;
+
+
+        private StateMachine _stateMachine;
 
         public HanamikojiGame()
         {
@@ -35,6 +38,8 @@ namespace HanamikojiServer
             _playerTwoData = new PlayerData();
             _random = new Random();
             _cardDeck = new List<GiftCard>();
+
+            
         }
 
         public void AddPlayer(TcpClient tcpClient)
@@ -56,13 +61,13 @@ namespace HanamikojiServer
         {
             _currentPlayer = _playerOneTcpClient;
             _currentPlayerData = _playerOneData;
-            ChangeState(new BeginRoundState(this));
+            _stateMachine = new StateMachine(new BeginRoundState(this));
 
             while (_gameRunning)
             {
                 CheckIfPlayerDisconnected();
 
-                ChangeState(_currentState.DoWork());
+                _stateMachine.Execute();
 
                 Thread.Sleep(10);
             }
@@ -120,14 +125,14 @@ namespace HanamikojiServer
         }
 
         public void SendGameDataToCurrentPlayer() =>
-            SendToCurrentPlayer(PacketCommandEnum.GameState, (new GameData(_currentPlayerData, _otherPlayerData)).SerializeToJson());
+            SendToCurrentPlayer(PacketCommandEnum.GameState, (new GameData(_currentPlayerData, _otherPlayerData.AnonimizeData())).SerializeToJson());
 
         public void SendGameDataToOtherPlayer() =>
-            SendToOtherPlayer(PacketCommandEnum.GameState, (new GameData(_otherPlayerData, _currentPlayerData)).SerializeToJson());
+            SendToOtherPlayer(PacketCommandEnum.GameState, (new GameData(_otherPlayerData, _currentPlayerData.AnonimizeData())).SerializeToJson());
 
         public void SendCompromiseOfferToOtherPlayer(List<GiftCard> compromiseCardsToOffer)
         {
-            var gameStateToSend = new GameData(_otherPlayerData, _currentPlayerData,
+            var gameStateToSend = new GameData(_otherPlayerData, _currentPlayerData.AnonimizeData(),
                 new List<PlayerMoveTypeEnum> { PlayerMoveTypeEnum.CompromiseOffer });
 
             gameStateToSend.SetCompromiseCards(compromiseCardsToOffer);
@@ -136,7 +141,7 @@ namespace HanamikojiServer
         }
         public void SendDoubleGiftOfferToOtherPlayer(List<GiftCard> compromiseCardsToOffer)
         {
-            var gameStateToSend = new GameData(_otherPlayerData, _currentPlayerData,
+            var gameStateToSend = new GameData(_otherPlayerData, _currentPlayerData.AnonimizeData(),
                 new List<PlayerMoveTypeEnum> { PlayerMoveTypeEnum.DoubleGiftOffer });
 
             gameStateToSend.SetDoubleGiftCards(compromiseCardsToOffer);
@@ -151,16 +156,6 @@ namespace HanamikojiServer
             _otherPlayerData.ClearData();
             DrawRandomCardsToCurrentPlayer(6);
             DrawRandomCardsToOtherPlayer(6);
-        }
-
-        public void ChangeState(AbstractServerState state)
-        {
-            if (state == null) return;
-
-            if (_currentState != null)
-                _currentState.ExitState();
-            _currentState = state;
-            _currentState.EnterState();
         }
 
         public void StopGame(string reason = "")

@@ -9,7 +9,6 @@ namespace HanamikojiServer.States
 {
     public class CurrentPlayerBeginTurnState : AbstractServerState
     {
-        private bool _currentPlayerReady = false;
         public CurrentPlayerBeginTurnState(HanamikojiGame game) : base(game) { }
         public override void EnterState()
         {
@@ -21,15 +20,7 @@ namespace HanamikojiServer.States
 
         public override AbstractServerState DoWork()
         {
-            Packet currentPlayerPacket = null;
-
-            if (!_currentPlayerReady)
-                currentPlayerPacket = _game.ReadFromCurrentPlayer().GetAwaiter().GetResult();
-
-            if (currentPlayerPacket != null && currentPlayerPacket.Command == PacketCommandEnum.Ready)
-                return new AwaitCurrentPlayerMoveState(_game);
-
-            return null;
+           return new AwaitCurrentPlayerMoveState(_game);
         }
 
         public override void ExitState()

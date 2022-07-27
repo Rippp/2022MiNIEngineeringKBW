@@ -1,42 +1,34 @@
-﻿using CommonResources.Network;
+﻿using CommonResources.Game;
+using CommonResources.Game.Constants;
+using CommonResources.Network;
 
 namespace HanamikojiServer.States
 {
     internal class CurrentPlayerEndTurnState : AbstractServerState
     {
-        private bool _currentPlayerReady = false;
-        private bool _otherPlayerReady = false;
+        private PlayerData _currentPlayerData;
+        private PlayerData _otherPlayerData;
         public CurrentPlayerEndTurnState(HanamikojiGame game) : base(game) { }
         public override void EnterState()
         {
             Console.WriteLine("Entered State: CurrentPlayerEndTurnState");
-            _game.SwitchPlayer();
-            _game.SendGameDataToPlayers();
+            
+            _currentPlayerData = _game.GetCurrentPlayerData();
+            _otherPlayerData = _game.GetOtherPlayerData();
         }
 
         public override AbstractServerState DoWork()
         {
-            Packet currentPlayerPacket = null;
-            Packet otherPlayerPacket = null;
+            if (!_currentPlayerData.IsAnyMoveAvailable() && !_otherPlayerData.IsAnyMoveAvailable())
+                return new EndRoundState(_game);
 
-            if (!_currentPlayerReady)
-                currentPlayerPacket = _game.ReadFromCurrentPlayer().GetAwaiter().GetResult();
-
-            if (!_otherPlayerReady)
-                otherPlayerPacket = _game.ReadFromOtherPlayer().GetAwaiter().GetResult();
-
-            if (currentPlayerPacket != null && currentPlayerPacket.Command == PacketCommandEnum.Ready)
-                _currentPlayerReady = true;
-
-            if (otherPlayerPacket != null && otherPlayerPacket.Command == PacketCommandEnum.Ready)
-                _otherPlayerReady = true;
-
-            return _currentPlayerReady && _otherPlayerReady ? new CurrentPlayerBeginTurnState(_game) : null;
+            return new CurrentPlayerBeginTurnState(_game);
         }
 
         public override void ExitState()
         {
-
+            _game.SwitchPlayer();
+            _game.SendGameDataToPlayers();
         }
     }
 }

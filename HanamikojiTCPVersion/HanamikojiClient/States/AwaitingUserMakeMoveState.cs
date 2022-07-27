@@ -29,7 +29,7 @@ namespace HanamikojiClient.States
             else
                 HandleRegularMove();
 
-            return new AwaitingServerMoveValidationState(_client);
+            return new AwaitingPacketState(_client);
         }
 
         public override void ExitState()

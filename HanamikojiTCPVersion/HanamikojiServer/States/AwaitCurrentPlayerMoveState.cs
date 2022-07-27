@@ -6,7 +6,11 @@ namespace HanamikojiServer.States
 {
     public class AwaitCurrentPlayerMoveState : AbstractServerState
     {
-        public AwaitCurrentPlayerMoveState(HanamikojiGame game) : base(game) { }
+        private readonly MoveData? _ongoingTradeMove;
+        public AwaitCurrentPlayerMoveState(HanamikojiGame game, MoveData? ongoingTradeMove = null) : base(game) 
+        {
+            _ongoingTradeMove = ongoingTradeMove;
+        }
         public override void EnterState()
         {
             Console.WriteLine("Entered State: AwaitCurrentPlayerMoveState");
@@ -20,9 +24,11 @@ namespace HanamikojiServer.States
             if (currentPlayerPacket != null && currentPlayerPacket.Command == PacketCommandEnum.PlayerMove)
             {
                 var moveData = MoveData.DeserializeFromJson(currentPlayerPacket.Message);
-                ConsoleWrapper.WriteInfo(moveData.MoveType.ToString());
-                ConsoleWrapper.ConsoleWriteCards(moveData.GiftCards, "Wybrane karty");
-                return new ValidateCurrentPlayerMoveState(_game, moveData);
+
+                if (_ongoingTradeMove != null) 
+                    moveData.TradeMoveGiftCards = _ongoingTradeMove.GiftCards;
+                
+                return new ExecuteCurrentPlayerMoveState(_game, moveData);
             }
 
             return null;

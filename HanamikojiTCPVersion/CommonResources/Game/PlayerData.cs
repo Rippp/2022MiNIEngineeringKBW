@@ -8,6 +8,7 @@ namespace CommonResources.Game
         public List<GiftCard> GiftsFromPlayer { get; set; } = new List<GiftCard>();
         public GiftCard? SecretCard { get; set; } = null;
         public List<GiftCard>? EliminationCards { get; set; } = null;
+        public List<GeishaType> ConvincedGeishasInPreviousRound = new List<GeishaType>();
 
         public Dictionary<PlayerMoveTypeEnum, bool> movesAvailability = new()
         {
@@ -20,6 +21,10 @@ namespace CommonResources.Game
         public void ClearData()
         {
             CardsOnHand.Clear();
+            GiftsFromPlayer.Clear();
+            SecretCard = null;
+            EliminationCards = null;
+            ConvincedGeishasInPreviousRound.Clear();
             MakeAllMovesAvailable();
         }
 

@@ -152,8 +152,6 @@ namespace HanamikojiServer
         public void StartNewRound()
         {
             _cardDeck = new List<GiftCard>(GiftCardConstants.GetAllCards());
-            _currentPlayerData.ClearData();
-            _otherPlayerData.ClearData();
             DrawRandomCardsToCurrentPlayer(6);
             DrawRandomCardsToOtherPlayer(6);
         }

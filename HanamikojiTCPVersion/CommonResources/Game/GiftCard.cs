@@ -15,7 +15,7 @@ namespace CommonResources.Game
 
         public override string ToString()
         {
-            return $"{Type.ToString()} - {CardId}";
+            return $"{Type.ToString()}";
         }
 
         public string SerializeToJson() => JsonConvert.SerializeObject(this);

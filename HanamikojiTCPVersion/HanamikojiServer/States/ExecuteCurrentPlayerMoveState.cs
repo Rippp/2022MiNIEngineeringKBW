@@ -6,12 +6,14 @@ namespace HanamikojiServer.States
     {
         private readonly MoveData _moveData;
         private readonly PlayerData _currentPlayerData;
+        private readonly PlayerData _otherPlayerData;
         private bool _moveExecuted = false;
 
         public ExecuteCurrentPlayerMoveState(HanamikojiGame game, MoveData moveData) : base(game)
         {
             _moveData = moveData;
             _currentPlayerData = _game.GetCurrentPlayerData();
+            _otherPlayerData = _game.GetOtherPlayerData();
         }
 
         public override void EnterState()
@@ -36,6 +38,11 @@ namespace HanamikojiServer.States
                     ExecuteDoubleGiftMove();
                     break;
 
+                case PlayerMoveTypeEnum.CompromiseResponse:
+                case PlayerMoveTypeEnum.DoubleGiftResponse:
+                    ExecuteTradeResponseMove();
+                    break;
+
                 default:
                     break;
             }
@@ -48,24 +55,23 @@ namespace HanamikojiServer.States
             if (_moveExecuted)
                 return new CurrentPlayerEndTurnState(_game);
 
-            return new AwaitOtherPlayerMoveState(_game, _moveData);
+            return new AwaitCurrentPlayerMoveState(_game, _moveData);
         }
 
-        public override void ExitState()
-        {
-
-        }
+        public override void ExitState() { }
 
         private void ExecuteCompromiseMove()
         {
             foreach (var card in _moveData.GiftCards) RemoveCardFromCurrentPlayerHand(card);
             _game.SendCompromiseOfferToOtherPlayer(_moveData.GiftCards);
+            _game.SwitchPlayer();
         }
 
         private void ExecuteDoubleGiftMove()
         {
             foreach (var card in _moveData.GiftCards) RemoveCardFromCurrentPlayerHand(card);
             _game.SendDoubleGiftOfferToOtherPlayer(_moveData.GiftCards);
+            _game.SwitchPlayer();
         }
 
         private void ExecuteSecretMove()
@@ -82,9 +88,17 @@ namespace HanamikojiServer.States
             _moveExecuted = true;
         }
 
+        private void ExecuteTradeResponseMove()
+        {
+            _currentPlayerData.GiftsFromPlayer.AddRange(_moveData.GiftCards);
+            _otherPlayerData.GiftsFromPlayer.AddRange(_moveData.TradeMoveGiftCards
+                .Where(x => !_moveData.GiftCards.Any(y => x.CardId == y.CardId)));
+
+            _game.SwitchPlayer();
+            _moveExecuted = true;
+        }
 
         private void RemoveCardFromCurrentPlayerHand(GiftCard cardToRemove)
-            => _currentPlayerData.CardsOnHand
-            .RemoveAt(_currentPlayerData.CardsOnHand.FindIndex(x => x.Type == cardToRemove.Type));
+            => _currentPlayerData.CardsOnHand.RemoveAll(x => x.CardId == cardToRemove.CardId);
     }
 }

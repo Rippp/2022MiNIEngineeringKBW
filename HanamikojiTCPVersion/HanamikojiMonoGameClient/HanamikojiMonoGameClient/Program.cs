@@ -1,4 +1,5 @@
 ﻿using System;
+using HanamikojiClient;
 
 namespace HanamikojiMonoGameClient
 {

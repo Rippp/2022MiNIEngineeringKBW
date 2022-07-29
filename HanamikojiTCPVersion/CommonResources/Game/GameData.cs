@@ -4,10 +4,15 @@ namespace CommonResources.Game
 {
     public class GameData
     {
+        [JsonProperty]
         public PlayerData CurrentPlayerData { get; private set; }
+        [JsonProperty]
         public PlayerData OtherPlayerData { get; private set; }
+        [JsonProperty]
         public List<PlayerMoveTypeEnum> MovesAvailable { get; private set; } = new List<PlayerMoveTypeEnum>();
+        [JsonProperty]
         public List<GiftCard>? CompromiseCards { get; private set; }
+        [JsonProperty]
         public List<GiftCard>? DoubleGiftCards { get; private set; }
 
         public GameData(PlayerData currentPlayerData, PlayerData otherPlayerData, List<PlayerMoveTypeEnum>? movesAvailable = null)
@@ -35,6 +40,8 @@ namespace CommonResources.Game
             {
                 return false;
             }
+
+            if (this == obj) return true;
 
             var gameData = (GameData)obj;
                 

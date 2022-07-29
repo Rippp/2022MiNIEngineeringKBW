@@ -11,6 +11,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CommonResources\CommonResources.csproj" />
+    <ProjectReference Include="..\..\HanamikojiClient\HanamikojiClient.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\bin\DesktopGL\" />

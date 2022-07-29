@@ -11,6 +11,7 @@ namespace HanamikojiServer.States
         {
             _ongoingTradeMove = ongoingTradeMove;
         }
+
         public override void EnterState()
         {
             Console.WriteLine("Entered State: AwaitCurrentPlayerMoveState");

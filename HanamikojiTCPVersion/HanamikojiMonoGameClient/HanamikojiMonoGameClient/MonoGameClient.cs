@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using CommonResources.Game;
+using HanamikojiClient;
 using HanamikojiMonoGameClient.GameEntities;
 using HanamikojiMonoGameClient.Sprites;
 using Microsoft.Xna.Framework;

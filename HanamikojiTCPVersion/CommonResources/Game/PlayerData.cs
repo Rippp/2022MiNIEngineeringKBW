@@ -4,12 +4,18 @@ namespace CommonResources.Game
 {
     public class PlayerData
     {
+        [JsonProperty]
         public List<GiftCard> CardsOnHand { get; private set; } = new List<GiftCard>();
+        [JsonProperty]
         public List<GiftCard> GiftsFromPlayer { get; private set; } = new List<GiftCard>();
+        [JsonProperty]
         public GiftCard? SecretCard { get; private set; } = null;
+        [JsonProperty]
         public List<GiftCard>? EliminationCards { get; private set; } = null;
+        [JsonProperty]
         public List<GeishaType> ConvincedGeishasInPreviousRound { get; private set; }  = new List<GeishaType>();
 
+        [JsonProperty]
         public Dictionary<PlayerMoveTypeEnum, bool> movesAvailability = new()
         {
             {PlayerMoveTypeEnum.DoubleGift, true},

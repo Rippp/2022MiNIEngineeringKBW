@@ -98,7 +98,47 @@ public class TableManager
                 var eliminatedCardEntity = _giftCardEntityDictionary[eliminatedCards.CardId];
                 _moveAnimationManager.AddMoveAnimationToDestination(eliminatedCardEntity, eliminatedOpponentCardPosition);
                 eliminatedOpponentCardPosition =
-                    new Vector2(eliminatedOpponentCardPosition.X + eliminatedCardEntity.Width / 2, eliminatedOpponentCardPosition.Y);
+                    new Vector2(eliminatedOpponentCardPosition.X + (3*eliminatedCardEntity.Width) / 4, eliminatedOpponentCardPosition.Y);
+            }
+        }
+
+        if (gameData.CurrentPlayerData.GiftsFromPlayer != null)
+        {
+            var currentGiftsCount = new Dictionary<GeishaType, int>();
+            foreach (var giftCard in gameData.CurrentPlayerData.GiftsFromPlayer)
+            {
+                var cardPosition = EntitiesPositions.GetPlayerGiftForGeishaFirstPosition(giftCard.Type);
+
+                if (currentGiftsCount.ContainsKey(giftCard.Type))
+                {
+                    cardPosition.Y += 20 * currentGiftsCount[giftCard.Type];
+                }
+                else
+                {
+                    currentGiftsCount[giftCard.Type] = 1;
+                }
+
+                _moveAnimationManager.AddMoveAnimationToDestination(_giftCardEntityDictionary[giftCard.CardId], cardPosition);
+            }
+        }
+
+        if (gameData.OtherPlayerData.GiftsFromPlayer != null)
+        {
+            var currentGiftsCount = new Dictionary<GeishaType, int>();
+            foreach (var giftCard in gameData.OtherPlayerData.GiftsFromPlayer)
+            {
+                var cardPosition = EntitiesPositions.GetOpponentGiftForGeishaFirstPosition(giftCard.Type);
+
+                if (currentGiftsCount.ContainsKey(giftCard.Type))
+                {
+                    cardPosition.Y -= 20 * currentGiftsCount[giftCard.Type];
+                }
+                else
+                {
+                    currentGiftsCount[giftCard.Type] = 1;
+                }
+
+                _moveAnimationManager.AddMoveAnimationToDestination(_giftCardEntityDictionary[giftCard.CardId], cardPosition);
             }
         }
     }
@@ -171,9 +211,9 @@ public class TableManager
 
 public static class EntitiesPositions
 {
-    public static readonly Vector2 FirstPlayerCardPosition = new Vector2(200, 700);
+    public static readonly Vector2 FirstPlayerCardPosition = new Vector2(700, 800);
 
-    public static readonly Vector2 FirstOpponentCardPosition = new Vector2(500, 200);
+    public static readonly Vector2 FirstOpponentCardPosition = new Vector2(700, 0);
 
     public static readonly Vector2 PlayerSecretPosition = new Vector2(1300, 650);
     public static readonly Vector2 OpponentSecretPosition = new Vector2(50,150);
@@ -201,4 +241,34 @@ public static class EntitiesPositions
             { PlayerMoveTypeEnum.Elimination, _firstOpponentMovePosition + new Vector2(150,0)},
             { PlayerMoveTypeEnum.Secret, _firstOpponentMovePosition + new Vector2(225,0)},
         };
+
+    private static readonly Vector2 _firstGeishaPosition = new Vector2(100, GameSettings.WINDOW_HEIGHT / 2 - SpritesProvider.GeishaSize / 2);
+    private const int _gapBetweenGeisha = 25;
+
+
+    public static IDictionary<GeishaType, Vector2> geishaPositions =
+        new Dictionary<GeishaType, Vector2>
+        {
+            {GeishaType.Geisha2_A, _firstGeishaPosition },
+            {GeishaType.Geisha2_B, _firstGeishaPosition + new Vector2(SpritesProvider.GeishaSize + _gapBetweenGeisha,0) },
+            {GeishaType.Geisha2_C, _firstGeishaPosition + new Vector2(2*(SpritesProvider.GeishaSize + _gapBetweenGeisha) ,0)},
+            {GeishaType.Geisha3_A, _firstGeishaPosition + new Vector2(3*(SpritesProvider.GeishaSize + _gapBetweenGeisha) ,0)},
+            {GeishaType.Geisha3_B, _firstGeishaPosition + new Vector2(4*(SpritesProvider.GeishaSize + _gapBetweenGeisha) ,0)},
+            {GeishaType.Geisha4_A, _firstGeishaPosition + new Vector2(5*(SpritesProvider.GeishaSize + _gapBetweenGeisha) ,0)},
+            {GeishaType.Geisha5_A, _firstGeishaPosition + new Vector2(6*(SpritesProvider.GeishaSize + _gapBetweenGeisha),0)},
+        };
+
+    public static Vector2 GetPlayerGiftForGeishaFirstPosition(GeishaType geishaType)
+    {
+        var geishaIconPosition = geishaPositions[geishaType];
+
+        return new Vector2(geishaIconPosition.X, geishaIconPosition.Y + SpritesProvider.GeishaSize + 10);
+    }
+
+    public static Vector2 GetOpponentGiftForGeishaFirstPosition(GeishaType geishaType)
+    {
+        var geishaIconPosition = geishaPositions[geishaType];
+
+        return new Vector2(geishaIconPosition.X, geishaIconPosition.Y - SpritesProvider.CardHeight - 10);
+    }
 }

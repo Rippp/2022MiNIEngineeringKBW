@@ -75,9 +75,21 @@ namespace HanamikojiMonoGameClient
                 new MoveCardEntity(PlayerMoveTypeEnum.Elimination),
             };
 
+            var geishaIcons = new List<GeishaEntity>
+            {
+                new GeishaEntity(GeishaType.Geisha2_A),
+                new GeishaEntity(GeishaType.Geisha2_B),
+                new GeishaEntity(GeishaType.Geisha2_C),
+                new GeishaEntity(GeishaType.Geisha3_A),
+                new GeishaEntity(GeishaType.Geisha3_B),
+                new GeishaEntity(GeishaType.Geisha4_A),
+                new GeishaEntity(GeishaType.Geisha5_A),
+            };
+
             _tableManager = new TableManager(playerMoves, opponentMoves);
             _gameEntities.AddRange(playerMoves);
             _gameEntities.AddRange(opponentMoves);
+            _gameEntities.AddRange(geishaIcons);
         }
 
         protected override void Update(GameTime gameTime)

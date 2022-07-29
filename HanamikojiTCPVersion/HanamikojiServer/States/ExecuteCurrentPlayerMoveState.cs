@@ -76,14 +76,14 @@ namespace HanamikojiServer.States
 
         private void ExecuteSecretMove()
         {
-            _currentPlayerData.SecretCard = _moveData.GiftCards.First();
+            _currentPlayerData.AddSecretCard(_moveData.GiftCards.First());
             RemoveCardFromCurrentPlayerHand(_moveData.GiftCards.First());
             _moveExecuted = true;
         }
 
         private void ExecuteEliminationMove()
         {
-            _currentPlayerData.EliminationCards = _moveData.GiftCards;
+            _currentPlayerData.AddEliminationCards(_moveData.GiftCards);
             foreach (var card in _moveData.GiftCards) RemoveCardFromCurrentPlayerHand(card);
             _moveExecuted = true;
         }

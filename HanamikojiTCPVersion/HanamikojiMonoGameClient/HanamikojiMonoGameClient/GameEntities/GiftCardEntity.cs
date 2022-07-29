@@ -8,12 +8,12 @@ namespace HanamikojiMonoGameClient.GameEntities;
 
 public class GiftCardEntity : GameEntity
 {
-    public GeishaType GeishaType {  get; private set; }
+    public Guid CardId { get; init; }
+    public GeishaType GeishaType {  get; init; }
 
-    public bool right = true;
-
-    public GiftCardEntity(GeishaType geishaType, Vector2? position = null) 
+    public GiftCardEntity(GeishaType geishaType, Guid cardId, Vector2? position = null) 
     {
+        CardId = cardId;
         Sprite = SpritesProvider.GetGiftCardSprite(geishaType);
         Position = position ?? _hiddenPosition;
         GeishaType = geishaType;
@@ -26,21 +26,5 @@ public class GiftCardEntity : GameEntity
 
     public override void Update(GameTime gameTime)
     {
-        var random = new Random();
-
-
-
-        if (random.Next(0, 100) < 90)
-        {
-            if (Position.X > GameSettings.WINDOW_WIDTH || Position.X <= 0) right = !right;
-            if (right)
-            {
-                Position += new Vector2(1, 0);
-            }
-            else
-            {
-                Position += new Vector2(-1, 0);
-            }
-        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using CommonResources.Game;
 using HanamikojiMonoGameClient.GameEntities;
@@ -57,10 +58,6 @@ namespace HanamikojiMonoGameClient
 
             _gameEntities = new List<GameEntity>();
 
-            _gameEntities.Add(new GiftCardEntity(GeishaType.Geisha2_A, new Vector2(100, 400)));
-            _gameEntities.Add(new GiftCardEntity(GeishaType.Geisha2_B, new Vector2(300, 400)));
-            _gameEntities.Add(new GiftCardEntity(GeishaType.AnonimizedGeisha, new Vector2(500, 400)));
-
             var playerMoves = new List<MoveCardEntity>
             {
                 new MoveCardEntity(PlayerMoveTypeEnum.Secret),
@@ -91,7 +88,8 @@ namespace HanamikojiMonoGameClient
 
             var gameData = _gameClient.GetGameData();
 
-            _tableManager.Update(gameData);
+            _tableManager.Update(gameData, gameTime);
+            _gameEntities.AddRange(_tableManager.GiveRecentlyAddedEntities());
 
             _gameEntities.ForEach(x => x.Update(gameTime));
 

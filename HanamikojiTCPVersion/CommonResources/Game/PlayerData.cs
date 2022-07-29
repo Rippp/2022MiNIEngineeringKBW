@@ -32,7 +32,10 @@ namespace CommonResources.Game
 
         public bool IsMoveAvailable(PlayerMoveTypeEnum move) => movesAvailability[move];
 
-        public void MarkMoveAsNotAvailable(PlayerMoveTypeEnum move) => movesAvailability[move] = false;
+        public void MarkMoveAsNotAvailable(PlayerMoveTypeEnum move)
+        {
+            if (movesAvailability.ContainsKey(move)) movesAvailability[move] = false;
+        }
 
         public bool IsAnyMoveAvailable() => movesAvailability.Any(x => x.Value);
 
@@ -51,6 +54,7 @@ namespace CommonResources.Game
             anonimizedData.SecretCard = SecretCard == null ? null : new GiftCard(GeishaType.AnonimizedGeisha, SecretCard.CardId);
             anonimizedData.EliminationCards = EliminationCards == null ?
                 null : EliminationCards.Select(x => new GiftCard(GeishaType.AnonimizedGeisha, x.CardId)).ToList();
+            anonimizedData.movesAvailability = new Dictionary<PlayerMoveTypeEnum, bool>(movesAvailability);
 
             return anonimizedData;
         }

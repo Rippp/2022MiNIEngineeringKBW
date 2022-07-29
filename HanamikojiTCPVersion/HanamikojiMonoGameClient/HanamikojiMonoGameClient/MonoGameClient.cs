@@ -16,6 +16,7 @@ namespace HanamikojiMonoGameClient
         private SpriteBatch _spriteBatch;
 
         TcpGameClient _gameClient;
+        TableManager _tableManager;
 
         private List<GameEntity> _gameEntities;
 
@@ -56,11 +57,29 @@ namespace HanamikojiMonoGameClient
 
             _gameEntities = new List<GameEntity>();
 
-            _gameEntities.Add(new GiftCardEntity(GeishaType.Geisha2_A, new Vector2(100, 100)));
-            _gameEntities.Add(new GiftCardEntity(GeishaType.Geisha2_B, new Vector2(300, 100)));
+            _gameEntities.Add(new GiftCardEntity(GeishaType.Geisha2_A, new Vector2(100, 400)));
+            _gameEntities.Add(new GiftCardEntity(GeishaType.Geisha2_B, new Vector2(300, 400)));
+            _gameEntities.Add(new GiftCardEntity(GeishaType.AnonimizedGeisha, new Vector2(500, 400)));
 
-            _gameEntities.Add(new GiftCardEntity(GeishaType.AnonimizedGeisha, new Vector2(500, 100)));
+            var playerMoves = new List<MoveCardEntity>
+            {
+                new MoveCardEntity(PlayerMoveTypeEnum.Secret),
+                new MoveCardEntity(PlayerMoveTypeEnum.Compromise),
+                new MoveCardEntity(PlayerMoveTypeEnum.DoubleGift),
+                new MoveCardEntity(PlayerMoveTypeEnum.Elimination),
+            };
 
+            var opponentMoves = new List<MoveCardEntity>
+            {
+                new MoveCardEntity(PlayerMoveTypeEnum.Secret),
+                new MoveCardEntity(PlayerMoveTypeEnum.Compromise),
+                new MoveCardEntity(PlayerMoveTypeEnum.DoubleGift),
+                new MoveCardEntity(PlayerMoveTypeEnum.Elimination),
+            };
+
+            _tableManager = new TableManager(playerMoves, opponentMoves);
+            _gameEntities.AddRange(playerMoves);
+            _gameEntities.AddRange(opponentMoves);
         }
 
         protected override void Update(GameTime gameTime)
@@ -70,7 +89,9 @@ namespace HanamikojiMonoGameClient
 
             // TODO: Add your update logic here
 
-            //var gameData = _gameClient.GetGameData();
+            var gameData = _gameClient.GetGameData();
+
+            _tableManager.Update(gameData);
 
             _gameEntities.ForEach(x => x.Update(gameTime));
 
@@ -84,7 +105,6 @@ namespace HanamikojiMonoGameClient
             _spriteBatch.Begin();
 
             // TODO: Add your drawing code here
-            
 
             _gameEntities.ForEach(x => x.Draw(_spriteBatch, gameTime));
 

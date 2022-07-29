@@ -10,6 +10,10 @@ public abstract class GameEntity
     public int DrawOrder { get; protected set; }
     public Vector2 Position { get; protected set; }
 
+    protected static Vector2 _hiddenPosition = new Vector2(10000,10000);
+
+
+    public void Hide() => Position = _hiddenPosition;
     public abstract void Draw(SpriteBatch spriteBatch, GameTime gameTime);
     public abstract void Update(GameTime gameTime);
 }

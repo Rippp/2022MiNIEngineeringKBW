@@ -12,10 +12,10 @@ public class GiftCardEntity : GameEntity
 
     public bool right = true;
 
-    public GiftCardEntity(GeishaType geishaType, Vector2 position) 
+    public GiftCardEntity(GeishaType geishaType, Vector2? position = null) 
     {
         Sprite = SpritesProvider.GetGiftCardSprite(geishaType);
-        Position = position;
+        Position = position ?? _hiddenPosition;
         GeishaType = geishaType;
     }
 

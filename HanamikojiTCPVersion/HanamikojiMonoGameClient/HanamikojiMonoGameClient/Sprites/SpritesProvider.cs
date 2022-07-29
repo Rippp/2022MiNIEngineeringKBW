@@ -30,10 +30,21 @@ namespace HanamikojiMonoGameClient.Sprites
             _ => throw new ArgumentOutOfRangeException(nameof(geishaType), geishaType, null)
         };
 
-        private static Sprite YellowCardSprite() => new(_cardsTextures, 16, 345, CardWidth, CardHeight);
+        public static Sprite GetMoveCardSprite(PlayerMoveTypeEnum geishaType) => geishaType switch
+        {
+            PlayerMoveTypeEnum.Elimination => GetEliminationMoveSprite(),
+            PlayerMoveTypeEnum.Secret => GetSecretMoveSprite(),
+            PlayerMoveTypeEnum.DoubleGift => GetDoubleGiftMoveSprite(),
+            PlayerMoveTypeEnum.Compromise => GetCompromiseMoveSprite(),
+            _ => throw new ArgumentOutOfRangeException(nameof(geishaType), geishaType, null)
+        };
 
+        private static Sprite GetSecretMoveSprite() => new(_cardsTextures, 16, 345, 111, 107);
+        private static Sprite GetEliminationMoveSprite() => new(_cardsTextures, 172, 345, 110, 107);
+        private static Sprite GetDoubleGiftMoveSprite() => new(_cardsTextures, 312, 345, 106, 107);
+        private static Sprite GetCompromiseMoveSprite() => new(_cardsTextures, 457, 345, 111, 108);
+        private static Sprite YellowCardSprite() => new(_cardsTextures, 16, 20, CardWidth, CardHeight);
         private static Sprite RedCard() => new(_cardsTextures, 191, 21, CardWidth, CardHeight);
-
         private static Sprite AnonimizedCard() => new(_cardsTextures, 375, 21, CardWidth, CardHeight);
     }
 }

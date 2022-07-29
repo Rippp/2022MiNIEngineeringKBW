@@ -13,7 +13,7 @@ public abstract class GameEntity
     public int Width => Sprite.Width;
     public int Height => Sprite.Width;
 
-    protected static Vector2 _hiddenPosition = new Vector2(10000, 10000);
+    protected static Vector2 _hiddenPosition = new Vector2(GameSettings.WINDOW_WIDTH, GameSettings.WINDOW_HEIGHT / 2);
 
     public void MoveToPosition(Vector2 newPosition) => Position = newPosition;
     public void Hide() => Position = _hiddenPosition;

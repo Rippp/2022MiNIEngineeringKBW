@@ -7,9 +7,10 @@ namespace HanamikojiMonoGameClient.Sprites
 {
     public static class SpritesProvider
     {
+        public const int CardWidth = 78;
+        public const int CardHeight = 117;
+
         private const string CardsAssetsName = "Cards";
-        private const int CardWidth = 78;
-        private const int CardHeight = 117;
         private static Texture2D _cardsTextures;
 
         public static void LoadTexture(Game game)

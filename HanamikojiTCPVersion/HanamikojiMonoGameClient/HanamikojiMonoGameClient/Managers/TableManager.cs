@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using CommonResources.Game;
 using HanamikojiMonoGameClient.GameEntities;
+using HanamikojiMonoGameClient.Managers;
+using HanamikojiMonoGameClient.Sprites;
 using Microsoft.Xna.Framework;
 
 namespace HanamikojiMonoGameClient;
 
 public class TableManager
 {
-    private MoveAnimationManager moveAnimationManager = new();
+    private MoveAnimationManager _moveAnimationManager = new();
     
     private List<MoveCardEntity> _playerMoves;
     private List<MoveCardEntity> _opponentMoves;
@@ -30,7 +32,7 @@ public class TableManager
 
     public void Update(GameData gameData, GameTime gameTime)
     {
-        moveAnimationManager.Update(gameTime);
+        _moveAnimationManager.Update(gameTime);
 
         if (!gameData.Equals(_lastReceivedGameData))
         {
@@ -46,16 +48,58 @@ public class TableManager
 
     private void InitializeMoveCardsToTheirDestination(GameData gameData)
     {
-        var cardsOnHand = gameData.CurrentPlayerData.CardsOnHand;
-
-        var nextCardDestination = EntitiesPositions.FirstPlayerCardPosition;
-        foreach (var card in cardsOnHand)
+        var nextPlayerCardDestination = EntitiesPositions.FirstPlayerCardPosition;
+        foreach (var card in gameData.CurrentPlayerData.CardsOnHand)
         {
             var giftCardEntity = _giftCardEntityDictionary[card.CardId];
+            _moveAnimationManager.AddMoveAnimationToDestination(giftCardEntity, nextPlayerCardDestination);
+            nextPlayerCardDestination = new Vector2(nextPlayerCardDestination.X + giftCardEntity.Width / 2, nextPlayerCardDestination.Y);
+        }
 
-            moveAnimationManager.AddMoveAnimationToDestination(giftCardEntity, nextCardDestination);
+        var opponentPlayerCardDestination = EntitiesPositions.FirstOpponentCardPosition;
+        foreach (var card in gameData.OtherPlayerData.CardsOnHand)
+        {
+            var giftCardEntity = _giftCardEntityDictionary[card.CardId];
+            _moveAnimationManager.AddMoveAnimationToDestination(giftCardEntity, opponentPlayerCardDestination);
+            opponentPlayerCardDestination = new Vector2(opponentPlayerCardDestination.X + giftCardEntity.Width / 2, opponentPlayerCardDestination.Y);
+        }
 
-            nextCardDestination = new Vector2(nextCardDestination.X + giftCardEntity.Width / 2, nextCardDestination.Y);
+        var playerSecretCard = gameData.CurrentPlayerData.SecretCard;
+        if (playerSecretCard != null)
+        {
+            var secretCardEntity = _giftCardEntityDictionary[playerSecretCard.CardId];
+            _moveAnimationManager.AddMoveAnimationToDestination(secretCardEntity, EntitiesPositions.PlayerSecretPosition);
+        }
+
+        var opponentSecretCard = gameData.OtherPlayerData.SecretCard;
+        if (opponentSecretCard != null)
+        {
+            var secretCardEntity = _giftCardEntityDictionary[opponentSecretCard.CardId];
+            _moveAnimationManager.AddMoveAnimationToDestination(secretCardEntity, EntitiesPositions.OpponentSecretPosition);
+        }
+
+        if (gameData.CurrentPlayerData.EliminationCards != null)
+        {
+            var eliminatedPlayerCardPosition = EntitiesPositions.PlayerEliminatedPosition;
+            foreach (var eliminatedCards in gameData.CurrentPlayerData.EliminationCards)
+            {
+                var eliminatedCardEntity = _giftCardEntityDictionary[eliminatedCards.CardId];
+                _moveAnimationManager.AddMoveAnimationToDestination(eliminatedCardEntity, eliminatedPlayerCardPosition);
+                eliminatedPlayerCardPosition = new Vector2(eliminatedPlayerCardPosition.X + eliminatedCardEntity.Width / 2,
+                    eliminatedPlayerCardPosition.Y);
+            }
+        }
+
+        if (gameData.OtherPlayerData.EliminationCards != null)
+        {
+            var eliminatedOpponentCardPosition = EntitiesPositions.OpponentEliminatedPosition;
+            foreach (var eliminatedCards in gameData.OtherPlayerData.EliminationCards)
+            {
+                var eliminatedCardEntity = _giftCardEntityDictionary[eliminatedCards.CardId];
+                _moveAnimationManager.AddMoveAnimationToDestination(eliminatedCardEntity, eliminatedOpponentCardPosition);
+                eliminatedOpponentCardPosition =
+                    new Vector2(eliminatedOpponentCardPosition.X + eliminatedCardEntity.Width / 2, eliminatedOpponentCardPosition.Y);
+            }
         }
     }
 
@@ -72,8 +116,8 @@ public class TableManager
     }
 
     public static List<GiftCard> GetMissingGiftCards(ICollection<Guid> existingCards, GameData gameData)
-        //    => gameData.GetAllCards().Where(x => !existingCards.Contains(x.CardId)).ToList();
-        => gameData.CurrentPlayerData.CardsOnHand.Where(x => !existingCards.Contains(x.CardId)).ToList();
+        => gameData.GetAllCards().Where(x => !existingCards.Contains(x.CardId)).ToList();
+        //=> gameData.CurrentPlayerData.CardsOnHand.Where(x => !existingCards.Contains(x.CardId)).ToList();
 
     public List<GameEntity> GiveRecentlyAddedEntities()
     {
@@ -127,25 +171,34 @@ public class TableManager
 
 public static class EntitiesPositions
 {
+    public static readonly Vector2 FirstPlayerCardPosition = new Vector2(200, 700);
+
+    public static readonly Vector2 FirstOpponentCardPosition = new Vector2(500, 200);
+
+    public static readonly Vector2 PlayerSecretPosition = new Vector2(1300, 650);
+    public static readonly Vector2 OpponentSecretPosition = new Vector2(50,150);
+
+    public static readonly Vector2 PlayerEliminatedPosition = new Vector2(PlayerSecretPosition.X + (int)(1.5 * SpritesProvider.CardWidth), PlayerSecretPosition.Y);
+    public static readonly Vector2 OpponentEliminatedPosition = new Vector2(OpponentSecretPosition.X + (int)(1.5 * SpritesProvider.CardWidth), OpponentSecretPosition.Y);
+
+    private static readonly Vector2 _firstPlayerMovePosition = new Vector2(1300, 800);
+    private static readonly Vector2 _firstOpponentMovePosition = new Vector2(50, 50);
+
     public static IDictionary<PlayerMoveTypeEnum, Vector2> PlayerMoveCardDefaultPositionDictionary =
         new Dictionary<PlayerMoveTypeEnum, Vector2>
         {
-            {PlayerMoveTypeEnum.Compromise, new Vector2(1000,750)},
-            {PlayerMoveTypeEnum.DoubleGift, new Vector2(1120,750)},
-            {PlayerMoveTypeEnum.Elimination, new Vector2(1240,750)},
-            {PlayerMoveTypeEnum.Secret, new Vector2(1360,750)},
+            { PlayerMoveTypeEnum.Compromise, _firstPlayerMovePosition},
+            { PlayerMoveTypeEnum.DoubleGift, _firstPlayerMovePosition + new Vector2(75,0) },
+            { PlayerMoveTypeEnum.Elimination, _firstPlayerMovePosition + new Vector2(150,0) },
+            { PlayerMoveTypeEnum.Secret, _firstPlayerMovePosition + new Vector2(225,0) },
         };
 
     public static IDictionary<PlayerMoveTypeEnum, Vector2> OpponentMoveCardDefaultPositionDictionary =
         new Dictionary<PlayerMoveTypeEnum, Vector2>
         {
-            {PlayerMoveTypeEnum.Compromise, new Vector2(100,100)},
-            {PlayerMoveTypeEnum.DoubleGift, new Vector2(220,100)},
-            {PlayerMoveTypeEnum.Elimination, new Vector2(340,100)},
-            {PlayerMoveTypeEnum.Secret, new Vector2(460,100)},
+            { PlayerMoveTypeEnum.Compromise, _firstOpponentMovePosition },
+            { PlayerMoveTypeEnum.DoubleGift, _firstOpponentMovePosition + new Vector2(75,0) },
+            { PlayerMoveTypeEnum.Elimination, _firstOpponentMovePosition + new Vector2(150,0)},
+            { PlayerMoveTypeEnum.Secret, _firstOpponentMovePosition + new Vector2(225,0)},
         };
-
-    public static Vector2 FirstPlayerCardPosition = new Vector2(200, 700);
-
-    public static Vector2 FirstOpponentCardPosition;
 }

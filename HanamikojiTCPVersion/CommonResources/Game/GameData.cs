@@ -9,7 +9,7 @@ namespace CommonResources.Game
         [JsonProperty]
         public PlayerData OtherPlayerData { get; private set; }
         [JsonProperty]
-        public List<PlayerMoveTypeEnum> MovesAvailable { get; private set; } = new List<PlayerMoveTypeEnum>();
+        public List<PlayerMoveTypeEnum> CurrentPossibleMoves { get; private set; } = new List<PlayerMoveTypeEnum>();
         [JsonProperty]
         public List<GiftCard>? CompromiseCards { get; private set; }
         [JsonProperty]
@@ -22,7 +22,7 @@ namespace CommonResources.Game
         {
             CurrentPlayerData = currentPlayerData;
             OtherPlayerData = otherPlayerData;
-            MovesAvailable = movesAvailable ?? currentPlayerData.GetAvailableMoves();
+            CurrentPossibleMoves = movesAvailable ?? currentPlayerData.GetAvailableMoves();
             MessageToCurrentPlayer = messageToCurrentPlayer;
         }
 
@@ -51,7 +51,7 @@ namespace CommonResources.Game
                 
             return gameData.CurrentPlayerData.Equals(CurrentPlayerData) &&
                    gameData.OtherPlayerData.Equals(OtherPlayerData) && 
-                   gameData.MovesAvailable.Equals(MovesAvailable) &&
+                   gameData.CurrentPossibleMoves.Equals(CurrentPossibleMoves) &&
                    GiftCard.AreCardListsTheSame(gameData.CompromiseCards, CompromiseCards) &&
                    GiftCard.AreCardListsTheSame(gameData.DoubleGiftCards, DoubleGiftCards);
         }

@@ -65,14 +65,14 @@ namespace CommonResources
             var selectedCards = AnsiConsole.Prompt(multiSelectionCardPrompt);
             while (true)
             {
-                if (selectedCards.Count != cardsToChoose)
-                {
-                    selectedCards = AnsiConsole.Prompt(multiSelectionCardPrompt.Title(title + $"Selected {selectedCards.Count} cards, you should select {cardsToChoose} cards!"));
-                }
-                else
-                {
+                //if (selectedCards.Count != cardsToChoose)
+               // {
+                  //  selectedCards = AnsiConsole.Prompt(multiSelectionCardPrompt.Title(title + $"Selected {selectedCards.Count} cards, you should select {cardsToChoose} cards!"));
+               // }
+                //else
+                //{
                     return selectedCards;
-                }
+               // }
             }
         }
 

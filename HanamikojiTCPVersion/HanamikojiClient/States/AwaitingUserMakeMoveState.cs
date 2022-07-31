@@ -22,9 +22,9 @@ namespace HanamikojiClient.States
         {
             PrintGameState();
 
-            if (_gameData.MovesAvailable.Contains(PlayerMoveTypeEnum.CompromiseOffer))
+            if (_gameData.CurrentPossibleMoves.Contains(PlayerMoveTypeEnum.CompromiseOffer))
                 HandleCompromiseOffer();
-            else if (_gameData.MovesAvailable.Contains(PlayerMoveTypeEnum.DoubleGiftOffer))
+            else if (_gameData.CurrentPossibleMoves.Contains(PlayerMoveTypeEnum.DoubleGiftOffer))
                 HandleDoubleGiftOffer();
             else
                 HandleRegularMove();
@@ -64,7 +64,7 @@ namespace HanamikojiClient.States
 
         private void HandleRegularMove()
         {
-            var selectedMoveType = ConsoleWrapper.PromptSingleSelection(_gameData.MovesAvailable, customTitle: "Select move:");
+            var selectedMoveType = ConsoleWrapper.PromptSingleSelection(_gameData.CurrentPossibleMoves, customTitle: "Select move:");
             _moveData.MoveType = selectedMoveType;
 
             var selectedCards = ConsoleWrapper.PromptMultipleCardsSelection(_gameData.CurrentPlayerData.CardsOnHand, GetNumberOfCardsToChoose(selectedMoveType),

@@ -128,7 +128,7 @@ namespace HanamikojiMonoGameClient
 
             _gameEntities.ForEach(x => x.Draw(_spriteBatch, gameTime));
 
-            _spriteBatch.DrawString(_messageFont, _message, new Vector2(100, 100), Color.Black);
+            _spriteBatch.DrawString(_messageFont, _message, new Vector2(0, 0), Color.Black);
 
             _spriteBatch.End();
             base.Draw(gameTime);

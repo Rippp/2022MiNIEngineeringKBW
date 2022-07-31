@@ -88,6 +88,7 @@ namespace HanamikojiMonoGameClient
             };
 
             _tableManager = new TableManager(playerMoves, opponentMoves);
+
             _gameEntities.AddRange(playerMoves);
             _gameEntities.AddRange(opponentMoves);
             _gameEntities.AddRange(geishaIcons);

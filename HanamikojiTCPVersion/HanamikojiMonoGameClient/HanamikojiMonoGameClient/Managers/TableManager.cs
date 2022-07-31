@@ -26,6 +26,10 @@ public class TableManager
         _playerMoves = playerMoves;
         _opponentMoves = opponentMoves;
         _giftCardEntityDictionary = new Dictionary<Guid, GiftCardEntity>();
+
+        var topDeckCard = new GiftCardEntity(GeishaType.AnonymizedGeisha, Guid.NewGuid());
+        topDeckCard.MoveToPosition(EntitiesPositions.TopDeckCardPosition);
+        _recentlyAddedEntities.Add(topDeckCard);
     }
 
     public void Update(GameData gameData, GameTime gameTime)
@@ -52,6 +56,7 @@ public class TableManager
         {
             var giftCardEntity = _giftCardEntityDictionary[card.CardId];
             _animationManager.AddMoveAnimationToDestination(giftCardEntity, nextPlayerCardDestination);
+            _animationManager.AddRotationAnimation(giftCardEntity, 0);
             nextPlayerCardDestination = new Vector2(nextPlayerCardDestination.X + giftCardEntity.Width / 2, nextPlayerCardDestination.Y);
         }
 
@@ -60,7 +65,7 @@ public class TableManager
         {
             var giftCardEntity = _giftCardEntityDictionary[card.CardId];
             _animationManager.AddMoveAnimationToDestination(giftCardEntity, opponentPlayerCardDestination);
-            if (giftCardEntity.IsHidden) _animationManager.AddRotationAnimation(giftCardEntity, (float)Math.PI);
+            if (giftCardEntity.Position == EntitiesPositions.TopDeckCardPosition) _animationManager.AddRotationAnimation(giftCardEntity, (float)Math.PI);
             opponentPlayerCardDestination = new Vector2(opponentPlayerCardDestination.X + giftCardEntity.Width / 2, opponentPlayerCardDestination.Y);
         }
 
@@ -183,6 +188,7 @@ public class TableManager
         foreach (var card in missingGiftCards)
         {
             var giftCardEntity = new GiftCardEntity(card.Type, card.CardId);
+            giftCardEntity.MoveToPosition(EntitiesPositions.TopDeckCardPosition);
 
             _giftCardEntityDictionary[card.CardId] = giftCardEntity;
             _recentlyAddedEntities.Add(giftCardEntity);
@@ -259,6 +265,8 @@ public class TableManager
 
 public static class EntitiesPositions
 {
+    public static readonly Vector2 TopDeckCardPosition = new Vector2(GameSettings.WINDOW_WIDTH - SpritesProvider.CardHeight, GameSettings.WINDOW_HEIGHT / 2 - SpritesProvider.CardWidth / 2);
+
     public static readonly Vector2 FirstPlayerCardPosition = new Vector2(700, 800);
 
     public static readonly Vector2 FirstOpponentCardPosition = new Vector2(700, 0);
@@ -294,7 +302,7 @@ public static class EntitiesPositions
         };
 
     private static readonly Vector2 _firstGeishaPosition = new Vector2(100, GameSettings.WINDOW_HEIGHT / 2 - SpritesProvider.GeishaSize / 2);
-    private const int _gapBetweenGeisha = 25;
+    private const int _gapBetweenGeisha = 5;
 
 
     public static IDictionary<GeishaType, Vector2> geishaPositions =

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CommonResources.Game;
 using HanamikojiClient;
 using HanamikojiMonoGameClient.GameEntities;
+using HanamikojiMonoGameClient.Managers;
 using HanamikojiMonoGameClient.Sprites;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

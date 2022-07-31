@@ -1,4 +1,5 @@
 ﻿using CommonResources.Game;
+using HanamikojiMonoGameClient.Managers;
 using HanamikojiMonoGameClient.Sprites;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -14,11 +15,6 @@ public class GeishaEntity : GameEntity
         Sprite = SpritesProvider.GetGeishaSprite(geishaType);
         Position = EntitiesPositions.geishaPositions[geishaType];
         GeishaType = geishaType;
-    }
-
-    public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
-    {
-        Sprite.Draw(spriteBatch, Position);
     }
 
     public override void Update(GameTime gameTime)

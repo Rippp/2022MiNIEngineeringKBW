@@ -19,11 +19,6 @@ public class MoveCardEntity : GameEntity
 
     public void MoveTo(Vector2 position) => Position = position;
 
-    public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
-    {
-        Sprite.Draw(spriteBatch, Position);
-    }
-
     public override void Update(GameTime gameTime)
     {
     }

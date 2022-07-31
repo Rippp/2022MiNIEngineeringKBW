@@ -21,9 +21,19 @@ namespace HanamikojiMonoGameClient.Sprites
             Height = height;
         }
 
-        public void Draw(SpriteBatch spriteBatch, Vector2 position)
+        public void Draw(SpriteBatch spriteBatch, Vector2 position, float rotation)
         {
-            spriteBatch.Draw(Texture, position, new Rectangle(X, Y, Width, Height), TintColor);
+            var positionWithCenterRotationAlignment = new Vector2(position.X + Width/2, position.Y + Height/2);
+            spriteBatch.Draw(
+                Texture, 
+                positionWithCenterRotationAlignment, 
+                new Rectangle(X, Y, Width, Height), 
+                TintColor, 
+                rotation, 
+                new Vector2(Width/2,Height/2), 
+                1, 
+                SpriteEffects.None, 
+                0f);
         }
     }
 }

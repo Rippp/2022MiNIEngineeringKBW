@@ -67,11 +67,11 @@ namespace CommonResources.Game
         {
             var anonimizedData = new PlayerData();
 
-            anonimizedData.CardsOnHand = CardsOnHand.Select(x => new GiftCard(GeishaType.AnonimizedGeisha, x.CardId)).ToList();
+            anonimizedData.CardsOnHand = CardsOnHand.Select(x => new GiftCard(GeishaType.AnonymizedGeisha, x.CardId)).ToList();
             anonimizedData.GiftsFromPlayer = GiftsFromPlayer;
-            anonimizedData.SecretCard = SecretCard == null ? null : new GiftCard(GeishaType.AnonimizedGeisha, SecretCard.CardId);
+            anonimizedData.SecretCard = SecretCard == null ? null : new GiftCard(GeishaType.AnonymizedGeisha, SecretCard.CardId);
             anonimizedData.EliminationCards = EliminationCards == null ?
-                null : EliminationCards.Select(x => new GiftCard(GeishaType.AnonimizedGeisha, x.CardId)).ToList();
+                null : EliminationCards.Select(x => new GiftCard(GeishaType.AnonymizedGeisha, x.CardId)).ToList();
             anonimizedData.movesAvailability = new Dictionary<PlayerMoveTypeEnum, bool>(movesAvailability);
 
             return anonimizedData;

@@ -15,12 +15,12 @@ namespace HanamikojiServer.States
             Console.WriteLine("Entered State: CurrentPlayerBeginTurnState");
 
             _game.DrawRandomCardsToCurrentPlayer(1);
-            _game.SendGameDataToCurrentPlayer();
+            _game.SendGameDataToPlayers();
         }
 
         public override AbstractServerState DoWork()
         {
-           return new AwaitCurrentPlayerMoveState(_game);
+            return new AwaitCurrentPlayerMoveState(_game);
         }
 
         public override void ExitState()

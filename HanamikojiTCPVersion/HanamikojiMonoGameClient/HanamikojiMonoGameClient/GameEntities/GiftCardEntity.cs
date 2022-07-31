@@ -9,19 +9,25 @@ namespace HanamikojiMonoGameClient.GameEntities;
 public class GiftCardEntity : GameEntity
 {
     public Guid CardId { get; init; }
-    public GeishaType GeishaType {  get; init; }
+    public GeishaType GeishaType {  get; private set; }
 
     public GiftCardEntity(GeishaType geishaType, Guid cardId, Vector2? position = null) 
     {
         CardId = cardId;
         Sprite = SpritesProvider.GetGiftCardSprite(geishaType);
-        Position = position ?? _hiddenPosition;
+        Position = position ?? new Vector2(_hiddenPosition.X, _hiddenPosition.Y);
         GeishaType = geishaType;
     }
 
-    public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+    public void RevealCard(GeishaType revealedGeishaType) 
     {
-        Sprite.Draw(spriteBatch, Position);
+        if (GeishaType != GeishaType.AnonymizedGeisha)
+        {
+            throw new Exception("Can not reveal not anonymized card");
+        }
+
+        GeishaType = revealedGeishaType;
+        Sprite = SpritesProvider.GetGiftCardSprite(revealedGeishaType);
     }
 
     public override void Update(GameTime gameTime)

@@ -3,21 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using CommonResources.Game;
 using HanamikojiMonoGameClient.GameEntities;
-using HanamikojiMonoGameClient.Managers;
 using HanamikojiMonoGameClient.Sprites;
 using Microsoft.Xna.Framework;
 
-namespace HanamikojiMonoGameClient;
+namespace HanamikojiMonoGameClient.Managers;
 
 public class TableManager
 {
-    private MoveAnimationManager _moveAnimationManager = new();
+    private AnimationManager _animationManager = new();
     
     private List<MoveCardEntity> _playerMoves;
     private List<MoveCardEntity> _opponentMoves;
 
     private IDictionary<Guid, GiftCardEntity> _giftCardEntityDictionary;
-    
 
     private GameData _lastReceivedGameData = null;
 
@@ -32,13 +30,14 @@ public class TableManager
 
     public void Update(GameData gameData, GameTime gameTime)
     {
-        _moveAnimationManager.Update(gameTime);
+        _animationManager.Update(gameTime);
 
         if (!gameData.Equals(_lastReceivedGameData))
         {
             CreateMissingGiftCards(gameData);
             ChangeVisibilityOfPlayerMoves(gameData);
             ChangeVisibilityOfOpponentMoves(gameData);
+            RevealCards(gameData);
 
             InitializeMoveCardsToTheirDestination(gameData);
             
@@ -52,7 +51,7 @@ public class TableManager
         foreach (var card in gameData.CurrentPlayerData.CardsOnHand)
         {
             var giftCardEntity = _giftCardEntityDictionary[card.CardId];
-            _moveAnimationManager.AddMoveAnimationToDestination(giftCardEntity, nextPlayerCardDestination);
+            _animationManager.AddMoveAnimationToDestination(giftCardEntity, nextPlayerCardDestination);
             nextPlayerCardDestination = new Vector2(nextPlayerCardDestination.X + giftCardEntity.Width / 2, nextPlayerCardDestination.Y);
         }
 
@@ -60,7 +59,8 @@ public class TableManager
         foreach (var card in gameData.OtherPlayerData.CardsOnHand)
         {
             var giftCardEntity = _giftCardEntityDictionary[card.CardId];
-            _moveAnimationManager.AddMoveAnimationToDestination(giftCardEntity, opponentPlayerCardDestination);
+            _animationManager.AddMoveAnimationToDestination(giftCardEntity, opponentPlayerCardDestination);
+            if (giftCardEntity.IsHidden) _animationManager.AddRotationAnimation(giftCardEntity, (float)Math.PI);
             opponentPlayerCardDestination = new Vector2(opponentPlayerCardDestination.X + giftCardEntity.Width / 2, opponentPlayerCardDestination.Y);
         }
 
@@ -68,14 +68,14 @@ public class TableManager
         if (playerSecretCard != null)
         {
             var secretCardEntity = _giftCardEntityDictionary[playerSecretCard.CardId];
-            _moveAnimationManager.AddMoveAnimationToDestination(secretCardEntity, EntitiesPositions.PlayerSecretPosition);
+            _animationManager.AddMoveAnimationToDestination(secretCardEntity, EntitiesPositions.PlayerSecretPosition);
         }
 
         var opponentSecretCard = gameData.OtherPlayerData.SecretCard;
         if (opponentSecretCard != null)
         {
             var secretCardEntity = _giftCardEntityDictionary[opponentSecretCard.CardId];
-            _moveAnimationManager.AddMoveAnimationToDestination(secretCardEntity, EntitiesPositions.OpponentSecretPosition);
+            _animationManager.AddMoveAnimationToDestination(secretCardEntity, EntitiesPositions.OpponentSecretPosition);
         }
 
         if (gameData.CurrentPlayerData.EliminationCards != null)
@@ -84,7 +84,7 @@ public class TableManager
             foreach (var eliminatedCards in gameData.CurrentPlayerData.EliminationCards)
             {
                 var eliminatedCardEntity = _giftCardEntityDictionary[eliminatedCards.CardId];
-                _moveAnimationManager.AddMoveAnimationToDestination(eliminatedCardEntity, eliminatedPlayerCardPosition);
+                _animationManager.AddMoveAnimationToDestination(eliminatedCardEntity, eliminatedPlayerCardPosition);
                 eliminatedPlayerCardPosition = new Vector2(eliminatedPlayerCardPosition.X + eliminatedCardEntity.Width / 2,
                     eliminatedPlayerCardPosition.Y);
             }
@@ -96,7 +96,7 @@ public class TableManager
             foreach (var eliminatedCards in gameData.OtherPlayerData.EliminationCards)
             {
                 var eliminatedCardEntity = _giftCardEntityDictionary[eliminatedCards.CardId];
-                _moveAnimationManager.AddMoveAnimationToDestination(eliminatedCardEntity, eliminatedOpponentCardPosition);
+                _animationManager.AddMoveAnimationToDestination(eliminatedCardEntity, eliminatedOpponentCardPosition);
                 eliminatedOpponentCardPosition =
                     new Vector2(eliminatedOpponentCardPosition.X + (3*eliminatedCardEntity.Width) / 4, eliminatedOpponentCardPosition.Y);
             }
@@ -118,7 +118,10 @@ public class TableManager
                     currentGiftsCount[giftCard.Type] = 1;
                 }
 
-                _moveAnimationManager.AddMoveAnimationToDestination(_giftCardEntityDictionary[giftCard.CardId], cardPosition);
+                var giftCardEntity = _giftCardEntityDictionary[giftCard.CardId];
+
+                _animationManager.AddMoveAnimationToDestination(giftCardEntity, cardPosition);
+                _animationManager.AddRotationAnimation(giftCardEntity, 0);
             }
         }
 
@@ -138,7 +141,37 @@ public class TableManager
                     currentGiftsCount[giftCard.Type] = 1;
                 }
 
-                _moveAnimationManager.AddMoveAnimationToDestination(_giftCardEntityDictionary[giftCard.CardId], cardPosition);
+                var giftCardEntity = _giftCardEntityDictionary[giftCard.CardId];
+
+                _animationManager.AddMoveAnimationToDestination(giftCardEntity, cardPosition);
+                _animationManager.AddRotationAnimation(giftCardEntity, (float)Math.PI);
+            }
+        }
+
+        if (gameData.DoubleGiftCards != null)
+        {
+            var cardPosition = EntitiesPositions.FirstPlayerTradeOfferCardPosition;
+            for (int i = 0; i < gameData.DoubleGiftCards.Count; i++)
+            {
+                var cardEntity = _giftCardEntityDictionary[gameData.DoubleGiftCards[i].CardId];
+
+                cardPosition.X += cardEntity.Width / 2;
+
+                if (i == 2) cardPosition.X += cardEntity.Width;
+
+                _animationManager.AddMoveAnimationToDestination(cardEntity, cardPosition);
+                _animationManager.AddRotationAnimation(cardEntity, 0);
+            }
+        }
+
+        if(gameData.CompromiseCards != null)
+        {
+            var cardPosition = EntitiesPositions.FirstPlayerTradeOfferCardPosition;
+            for (int i = 0; i < gameData.CompromiseCards.Count; i++)
+            {
+                var cardEntity = _giftCardEntityDictionary[gameData.CompromiseCards[i].CardId];
+                cardPosition.X += cardEntity.Width / 2;
+                _animationManager.AddMoveAnimationToDestination(cardEntity, cardPosition);
             }
         }
     }
@@ -155,9 +188,8 @@ public class TableManager
         }
     }
 
-    public static List<GiftCard> GetMissingGiftCards(ICollection<Guid> existingCards, GameData gameData)
-        => gameData.GetAllCards().Where(x => !existingCards.Contains(x.CardId)).ToList();
-        //=> gameData.CurrentPlayerData.CardsOnHand.Where(x => !existingCards.Contains(x.CardId)).ToList();
+    public static List<GiftCard> GetMissingGiftCards(ICollection<Guid> existingCardIds, GameData gameData)
+        => gameData.GetAllCards().Where(x => !existingCardIds.Contains(x.CardId)).ToList();
 
     public List<GameEntity> GiveRecentlyAddedEntities()
     {
@@ -165,6 +197,21 @@ public class TableManager
         _recentlyAddedEntities = new List<GameEntity>();
 
         return gameEntitiesToGive;
+    }
+
+    private void RevealCards(GameData gameData)
+    {
+        var allCards = gameData.GetAllCards();
+
+        foreach (var card in allCards)
+        {
+            var cardEntity = _giftCardEntityDictionary[card.CardId];
+
+            if (cardEntity.GeishaType == GeishaType.AnonymizedGeisha && card.Type != GeishaType.AnonymizedGeisha)
+            {
+                cardEntity.RevealCard(card.Type);
+            }
+        }
     }
 
     private void ChangeVisibilityOfOpponentMoves(GameData gameData)
@@ -221,8 +268,11 @@ public static class EntitiesPositions
     public static readonly Vector2 PlayerEliminatedPosition = new Vector2(PlayerSecretPosition.X + (int)(1.5 * SpritesProvider.CardWidth), PlayerSecretPosition.Y);
     public static readonly Vector2 OpponentEliminatedPosition = new Vector2(OpponentSecretPosition.X + (int)(1.5 * SpritesProvider.CardWidth), OpponentSecretPosition.Y);
 
+    public static readonly Vector2 FirstPlayerTradeOfferCardPosition = new Vector2(FirstOpponentCardPosition.X, (int)(FirstOpponentCardPosition.Y + 1.1 * SpritesProvider.CardHeight));
+
     private static readonly Vector2 _firstPlayerMovePosition = new Vector2(1300, 800);
     private static readonly Vector2 _firstOpponentMovePosition = new Vector2(50, 50);
+
 
     public static IDictionary<PlayerMoveTypeEnum, Vector2> PlayerMoveCardDefaultPositionDictionary =
         new Dictionary<PlayerMoveTypeEnum, Vector2>

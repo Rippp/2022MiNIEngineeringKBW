@@ -118,17 +118,19 @@ namespace HanamikojiServer
             _currentPlayerData = isPlayerOneCurrent ? _playerTwoData : _playerOneData;
         }
 
-        public void SendGameDataToPlayers()
+        public void SendGameDataToPlayers(string messageToCurrentPlayer = "", string messageToOtherPlayer = "")
         {
-            SendGameDataToCurrentPlayer();
-            SendGameDataToOtherPlayer();
+            SendGameDataToCurrentPlayer(messageToCurrentPlayer);
+            SendGameDataToOtherPlayer(messageToOtherPlayer);
         }
 
-        public void SendGameDataToCurrentPlayer() =>
-            SendToCurrentPlayer(PacketCommandEnum.GameState, (new GameData(_currentPlayerData, _otherPlayerData.AnonimizeData())).SerializeToJson());
+        public void SendGameDataToCurrentPlayer(string message = "") =>
+            SendToCurrentPlayer(PacketCommandEnum.GameState, (new GameData(_currentPlayerData, _otherPlayerData.AnonimizeData(),
+                messageToCurrentPlayer: message)).SerializeToJson());
 
-        public void SendGameDataToOtherPlayer() =>
-            SendToOtherPlayer(PacketCommandEnum.GameState, (new GameData(_otherPlayerData, _currentPlayerData.AnonimizeData())).SerializeToJson());
+        public void SendGameDataToOtherPlayer(string message = "") =>
+            SendToOtherPlayer(PacketCommandEnum.GameState, (new GameData(_otherPlayerData, _currentPlayerData.AnonimizeData(),
+                messageToCurrentPlayer: message)).SerializeToJson());
 
         public void SendCompromiseOfferToOtherPlayer(List<GiftCard> compromiseCardsToOffer)
         {

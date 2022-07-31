@@ -1,11 +1,4 @@
-﻿using CommonResources.Network;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HanamikojiServer.States
+﻿namespace HanamikojiServer.States
 {
     public class CurrentPlayerBeginTurnState : AbstractServerState
     {
@@ -15,7 +8,7 @@ namespace HanamikojiServer.States
             Console.WriteLine("Entered State: CurrentPlayerBeginTurnState");
 
             _game.DrawRandomCardsToCurrentPlayer(1);
-            _game.SendGameDataToPlayers();
+            _game.SendGameDataToPlayers(messageToCurrentPlayer: "It's your turn!", messageToOtherPlayer: "Awaiting other player move...");
         }
 
         public override AbstractServerState DoWork()

@@ -29,7 +29,7 @@ namespace HanamikojiServer.States
                 if (_ongoingTradeMove != null) 
                     moveData.TradeMoveGiftCards = _ongoingTradeMove.GiftCards;
                 
-                return new ExecuteCurrentPlayerMoveState(_game, moveData);
+                return new ValidateCurrentPlayerMoveState(_game, moveData);
             }
 
             return null;

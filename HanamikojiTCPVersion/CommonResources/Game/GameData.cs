@@ -14,12 +14,16 @@ namespace CommonResources.Game
         public List<GiftCard>? CompromiseCards { get; private set; }
         [JsonProperty]
         public List<GiftCard>? DoubleGiftCards { get; private set; }
+        [JsonProperty]
+        public string MessageToCurrentPlayer { get; private set; }
 
-        public GameData(PlayerData currentPlayerData, PlayerData otherPlayerData, List<PlayerMoveTypeEnum>? movesAvailable = null)
+        public GameData(PlayerData currentPlayerData, PlayerData otherPlayerData,
+            List<PlayerMoveTypeEnum>? movesAvailable = null, string messageToCurrentPlayer = "")
         {
             CurrentPlayerData = currentPlayerData;
             OtherPlayerData = otherPlayerData;
             MovesAvailable = movesAvailable ?? currentPlayerData.GetAvailableMoves();
+            MessageToCurrentPlayer = messageToCurrentPlayer;
         }
 
         public void SetCompromiseCards(List<GiftCard> compromiseCards) =>

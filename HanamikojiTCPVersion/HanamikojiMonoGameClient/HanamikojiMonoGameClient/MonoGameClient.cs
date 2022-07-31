@@ -22,6 +22,9 @@ namespace HanamikojiMonoGameClient
         TableManager _tableManager;
 
         private List<GameEntity> _gameEntities;
+        
+        private SpriteFont _messageFont;
+        private string _message;
 
         public MonoGameClient(TcpGameClient gameClient)
         {
@@ -92,6 +95,8 @@ namespace HanamikojiMonoGameClient
             _gameEntities.AddRange(playerMoves);
             _gameEntities.AddRange(opponentMoves);
             _gameEntities.AddRange(geishaIcons);
+
+            _messageFont = Content.Load<SpriteFont>("messageFont");
         }
 
         protected override void Update(GameTime gameTime)
@@ -108,6 +113,8 @@ namespace HanamikojiMonoGameClient
 
             _gameEntities.ForEach(x => x.Update(gameTime));
 
+            _message = gameData.MessageToCurrentPlayer;
+
             base.Update(gameTime);
         }
 
@@ -120,6 +127,8 @@ namespace HanamikojiMonoGameClient
             // TODO: Add your drawing code here
 
             _gameEntities.ForEach(x => x.Draw(_spriteBatch, gameTime));
+
+            _spriteBatch.DrawString(_messageFont, _message, new Vector2(100, 100), Color.Black);
 
             _spriteBatch.End();
             base.Draw(gameTime);

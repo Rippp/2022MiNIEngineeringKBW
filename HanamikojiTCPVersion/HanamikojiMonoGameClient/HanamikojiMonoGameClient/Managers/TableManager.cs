@@ -172,6 +172,7 @@ public class TableManager
                 var cardEntity = _giftCardEntityDictionary[gameData.CompromiseCards[i].CardId];
                 cardPosition.X += cardEntity.Width / 2;
                 _animationManager.AddMoveAnimationToDestination(cardEntity, cardPosition);
+                _animationManager.AddRotationAnimation(cardEntity, 0);
             }
         }
     }
@@ -312,13 +313,13 @@ public static class EntitiesPositions
     {
         var geishaIconPosition = geishaPositions[geishaType];
 
-        return new Vector2(geishaIconPosition.X, geishaIconPosition.Y + SpritesProvider.GeishaSize + 10);
+        return new Vector2(geishaIconPosition.X + SpritesProvider.GeishaSize / 2 - SpritesProvider.CardWidth / 2, geishaIconPosition.Y + SpritesProvider.GeishaSize + 10);
     }
 
     public static Vector2 GetOpponentGiftForGeishaFirstPosition(GeishaType geishaType)
     {
         var geishaIconPosition = geishaPositions[geishaType];
 
-        return new Vector2(geishaIconPosition.X, geishaIconPosition.Y - SpritesProvider.CardHeight - 10);
+        return new Vector2(geishaIconPosition.X + SpritesProvider.GeishaSize / 2 - SpritesProvider.CardWidth / 2,  geishaIconPosition.Y - SpritesProvider.CardHeight - 10);
     }
 }

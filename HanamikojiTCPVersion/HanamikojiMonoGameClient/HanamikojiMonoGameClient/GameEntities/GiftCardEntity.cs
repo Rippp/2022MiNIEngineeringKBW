@@ -30,6 +30,9 @@ public class GiftCardEntity : GameEntity
         Sprite = SpritesProvider.GetGiftCardSprite(revealedGeishaType);
     }
 
+    public bool IsPointInsideLeftHalfOfSprite(Vector2 point) => (point.X >= Position.X && point.X <= (Position.X + Width / 2.0)) &&
+                                                      (point.Y >= Position.Y && point.Y <= (Position.Y + Height));
+
     public override void Update(GameTime gameTime)
     {
     }

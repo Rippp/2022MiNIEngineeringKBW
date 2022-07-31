@@ -18,25 +18,33 @@ namespace HanamikojiMonoGameClient
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        TcpGameClient _gameClient;
+        TcpGameClient _tcpGameClient;
         TableManager _tableManager;
+        InputManager _inputManager;
+
+        private Button _submitButton;
 
         private List<GameEntity> _gameEntities;
-        
+        private IDictionary<Guid, GiftCardEntity> _giftCardEntityDictionary = new Dictionary<Guid, GiftCardEntity>();
+
         private SpriteFont _messageFont;
         private string _message;
 
-        public MonoGameClient(TcpGameClient gameClient)
+        public MonoGameClient(TcpGameClient tcpGameClient)
         {
-            _gameClient = gameClient;
+            _tcpGameClient = tcpGameClient;
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
 
+            _gameEntities = new List<GameEntity>();
+
+
+
             Task.Run(() =>
             {
-                gameClient.ConnectToServer();
-                gameClient.Run();
+                tcpGameClient.ConnectToServer();
+                tcpGameClient.Run();
             });
         }
 
@@ -58,25 +66,23 @@ namespace HanamikojiMonoGameClient
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
             SpritesProvider.LoadTexture(this);
 
-            _gameEntities = new List<GameEntity>();
-
+            // TODO: can be moved to TableManager constructor
             var playerMoves = new List<MoveCardEntity>
             {
-                new MoveCardEntity(PlayerMoveTypeEnum.Secret),
-                new MoveCardEntity(PlayerMoveTypeEnum.Compromise),
-                new MoveCardEntity(PlayerMoveTypeEnum.DoubleGift),
-                new MoveCardEntity(PlayerMoveTypeEnum.Elimination),
+                new MoveCardEntity(PlayerMoveTypeEnum.Secret, true),
+                new MoveCardEntity(PlayerMoveTypeEnum.Compromise, true),
+                new MoveCardEntity(PlayerMoveTypeEnum.DoubleGift, true),
+                new MoveCardEntity(PlayerMoveTypeEnum.Elimination, true),
             };
 
             var opponentMoves = new List<MoveCardEntity>
             {
-                new MoveCardEntity(PlayerMoveTypeEnum.Secret),
-                new MoveCardEntity(PlayerMoveTypeEnum.Compromise),
-                new MoveCardEntity(PlayerMoveTypeEnum.DoubleGift),
-                new MoveCardEntity(PlayerMoveTypeEnum.Elimination),
+                new MoveCardEntity(PlayerMoveTypeEnum.Secret, false),
+                new MoveCardEntity(PlayerMoveTypeEnum.Compromise, false),
+                new MoveCardEntity(PlayerMoveTypeEnum.DoubleGift, false),
+                new MoveCardEntity(PlayerMoveTypeEnum.Elimination, false),
             };
 
             var geishaIcons = new List<GeishaEntity>
@@ -90,27 +96,29 @@ namespace HanamikojiMonoGameClient
                 new GeishaEntity(GeishaType.Geisha5_A),
             };
 
-            _tableManager = new TableManager(playerMoves, opponentMoves);
+            _submitButton = new Button();
+
+            _tableManager = new TableManager(playerMoves, opponentMoves, _giftCardEntityDictionary);
+            _inputManager = new InputManager(_gameEntities, _giftCardEntityDictionary, _tcpGameClient, _submitButton);
 
             _gameEntities.AddRange(playerMoves);
             _gameEntities.AddRange(opponentMoves);
             _gameEntities.AddRange(geishaIcons);
+            _gameEntities.Add(_submitButton);
 
             _messageFont = Content.Load<SpriteFont>("messageFont");
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
             // TODO: Add your update logic here
 
-            var gameData = _gameClient.GetGameData();
+            var gameData = _tcpGameClient.GetGameData();
 
             _tableManager.Update(gameData, gameTime);
-            _gameEntities.AddRange(_tableManager.GiveRecentlyAddedEntities());
+            _inputManager.Update(gameData);
 
+            _gameEntities.AddRange(_tableManager.GiveRecentlyAddedEntities());
             _gameEntities.ForEach(x => x.Update(gameTime));
 
             _message = gameData.MessageToCurrentPlayer;
@@ -134,4 +142,6 @@ namespace HanamikojiMonoGameClient
             base.Draw(gameTime);
         }
     }
+
+    
 }

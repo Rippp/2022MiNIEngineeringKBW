@@ -15,17 +15,17 @@ public class TableManager
     private List<MoveCardEntity> _playerMoves;
     private List<MoveCardEntity> _opponentMoves;
 
-    private IDictionary<Guid, GiftCardEntity> _giftCardEntityDictionary;
-
     private GameData _lastReceivedGameData = null;
+
+    private IDictionary<Guid, GiftCardEntity> _giftCardEntityDictionary;
 
     private List<GameEntity> _recentlyAddedEntities = new List<GameEntity>();
 
-    public TableManager(List<MoveCardEntity> playerMoves, List<MoveCardEntity> opponentMoves)
+    public TableManager(List<MoveCardEntity> playerMoves, List<MoveCardEntity> opponentMoves, IDictionary<Guid, GiftCardEntity> giftCardEntityDictionary)
     {
         _playerMoves = playerMoves;
         _opponentMoves = opponentMoves;
-        _giftCardEntityDictionary = new Dictionary<Guid, GiftCardEntity>();
+        _giftCardEntityDictionary = giftCardEntityDictionary;
 
         var topDeckCard = new GiftCardEntity(GeishaType.AnonymizedGeisha, Guid.NewGuid());
         topDeckCard.MoveToPosition(EntitiesPositions.TopDeckCardPosition);
@@ -57,7 +57,7 @@ public class TableManager
             var giftCardEntity = _giftCardEntityDictionary[card.CardId];
             _animationManager.AddMoveAnimationToDestination(giftCardEntity, nextPlayerCardDestination);
             _animationManager.AddRotationAnimation(giftCardEntity, 0);
-            nextPlayerCardDestination = new Vector2(nextPlayerCardDestination.X + giftCardEntity.Width / 2, nextPlayerCardDestination.Y);
+            nextPlayerCardDestination = new Vector2(nextPlayerCardDestination.X + giftCardEntity.Width / 2.0f, nextPlayerCardDestination.Y);
         }
 
         var opponentPlayerCardDestination = EntitiesPositions.FirstOpponentCardPosition;
@@ -66,7 +66,7 @@ public class TableManager
             var giftCardEntity = _giftCardEntityDictionary[card.CardId];
             _animationManager.AddMoveAnimationToDestination(giftCardEntity, opponentPlayerCardDestination);
             if (giftCardEntity.Position == EntitiesPositions.TopDeckCardPosition) _animationManager.AddRotationAnimation(giftCardEntity, (float)Math.PI);
-            opponentPlayerCardDestination = new Vector2(opponentPlayerCardDestination.X + giftCardEntity.Width / 2, opponentPlayerCardDestination.Y);
+            opponentPlayerCardDestination = new Vector2(opponentPlayerCardDestination.X + giftCardEntity.Width / 2.0f, opponentPlayerCardDestination.Y);
         }
 
         var playerSecretCard = gameData.CurrentPlayerData.SecretCard;
@@ -90,7 +90,7 @@ public class TableManager
             {
                 var eliminatedCardEntity = _giftCardEntityDictionary[eliminatedCards.CardId];
                 _animationManager.AddMoveAnimationToDestination(eliminatedCardEntity, eliminatedPlayerCardPosition);
-                eliminatedPlayerCardPosition = new Vector2(eliminatedPlayerCardPosition.X + eliminatedCardEntity.Width / 2,
+                eliminatedPlayerCardPosition = new Vector2(eliminatedPlayerCardPosition.X + eliminatedCardEntity.Width / 2.0f,
                     eliminatedPlayerCardPosition.Y);
             }
         }
@@ -160,7 +160,7 @@ public class TableManager
             {
                 var cardEntity = _giftCardEntityDictionary[gameData.DoubleGiftCards[i].CardId];
 
-                cardPosition.X += cardEntity.Width / 2;
+                cardPosition.X += cardEntity.Width / 2.0f;
 
                 if (i == 2) cardPosition.X += cardEntity.Width;
 
@@ -175,7 +175,7 @@ public class TableManager
             for (int i = 0; i < gameData.CompromiseCards.Count; i++)
             {
                 var cardEntity = _giftCardEntityDictionary[gameData.CompromiseCards[i].CardId];
-                cardPosition.X += cardEntity.Width / 2;
+                cardPosition.X += cardEntity.Width / 2.0f;
                 _animationManager.AddMoveAnimationToDestination(cardEntity, cardPosition);
                 _animationManager.AddRotationAnimation(cardEntity, 0);
             }
@@ -265,7 +265,7 @@ public class TableManager
 
 public static class EntitiesPositions
 {
-    public static readonly Vector2 TopDeckCardPosition = new Vector2(GameSettings.WINDOW_WIDTH - SpritesProvider.CardHeight, GameSettings.WINDOW_HEIGHT / 2 - SpritesProvider.CardWidth / 2);
+    public static readonly Vector2 TopDeckCardPosition = new Vector2(GameSettings.WINDOW_WIDTH - SpritesProvider.CardHeight, GameSettings.WINDOW_HEIGHT / 2.0f - SpritesProvider.CardWidth / 2.0f);
 
     public static readonly Vector2 FirstPlayerCardPosition = new Vector2(700, 800);
 
@@ -301,7 +301,7 @@ public static class EntitiesPositions
             { PlayerMoveTypeEnum.Secret, _firstOpponentMovePosition + new Vector2(225,0)},
         };
 
-    private static readonly Vector2 _firstGeishaPosition = new Vector2(100, GameSettings.WINDOW_HEIGHT / 2 - SpritesProvider.GeishaSize / 2);
+    private static readonly Vector2 _firstGeishaPosition = new Vector2(100, GameSettings.WINDOW_HEIGHT / 2.0f - SpritesProvider.GeishaSize / 2.0f);
     private const int _gapBetweenGeisha = 5;
 
 
@@ -321,13 +321,13 @@ public static class EntitiesPositions
     {
         var geishaIconPosition = geishaPositions[geishaType];
 
-        return new Vector2(geishaIconPosition.X + SpritesProvider.GeishaSize / 2 - SpritesProvider.CardWidth / 2, geishaIconPosition.Y + SpritesProvider.GeishaSize + 10);
+        return new Vector2(geishaIconPosition.X + SpritesProvider.GeishaSize / 2.0f - SpritesProvider.CardWidth / 2.0f, geishaIconPosition.Y + SpritesProvider.GeishaSize + 10);
     }
 
     public static Vector2 GetOpponentGiftForGeishaFirstPosition(GeishaType geishaType)
     {
         var geishaIconPosition = geishaPositions[geishaType];
 
-        return new Vector2(geishaIconPosition.X + SpritesProvider.GeishaSize / 2 - SpritesProvider.CardWidth / 2,  geishaIconPosition.Y - SpritesProvider.CardHeight - 10);
+        return new Vector2(geishaIconPosition.X + SpritesProvider.GeishaSize / 2.0f - SpritesProvider.CardWidth / 2.0f,  geishaIconPosition.Y - SpritesProvider.CardHeight - 10);
     }
 }

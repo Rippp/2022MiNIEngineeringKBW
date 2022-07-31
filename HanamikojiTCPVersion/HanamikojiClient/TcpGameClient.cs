@@ -12,7 +12,8 @@ public class TcpGameClient
     public readonly string ServerAddress;
     public readonly int Port;
     public bool Running { get; private set; }
-    
+    private MoveData? _nextMoveData { get; set; }
+
     private TcpClient _server;
     private NetworkStream _msgStream = null;
     private AbstractClientState? _currentState = null;
@@ -68,7 +69,24 @@ public class TcpGameClient
         CleanupNetworkResources();
     }
 
-    public void ChangeState(AbstractClientState state)
+    public GameData GetGameData() => _gameData;
+
+    public bool IsMoveDataSet() => _nextMoveData != null;
+
+    public MoveData GetMoveData()
+    {
+        if (_nextMoveData == null) throw new Exception("move data is not set");
+        var moveData = _nextMoveData;
+        _nextMoveData = null;
+        return moveData; 
+    }
+
+    public void SetNextMoveData(MoveData nextMoveData)
+    {
+        _nextMoveData = nextMoveData;
+    }
+
+    private void ChangeState(AbstractClientState state)
     {
         if (state == null) return;
 
@@ -113,7 +131,6 @@ public class TcpGameClient
         Console.WriteLine(packet.ToString());
     }
 
-    public GameData GetGameData() => _gameData;
 
     private async Task HandlePacket(Packet packet)
     {

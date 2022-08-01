@@ -26,6 +26,8 @@ public abstract class GameEntity
 
     public void MoveInY(int offset) => Position = new Vector2(Position.X, Position.Y + offset);
 
+    public void SetDrawOrder(int drawOrder) => DrawOrder = drawOrder;
+
     public void SetRotation(float rotation) => Rotation = rotation;
 
     public void Hide() => Position = _hiddenPosition;

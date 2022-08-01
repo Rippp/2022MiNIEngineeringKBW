@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CommonResources.Game;
 using HanamikojiMonoGameClient.GameEntities;
 using Microsoft.Xna.Framework;
@@ -33,30 +34,18 @@ public class PointedCardAnimator
         var cardsOnHand = gameData.CurrentPlayerData.CardsOnHand;
         var mousePosition = new Vector2(mouseState.X, mouseState.Y);
 
+        var pointedCardsOnHand = new List<GiftCardEntity>();
 
-        var isAnyCardPointed = false;
-        for (int i = 0; i < cardsOnHand.Count; i++)
+        foreach (var card in cardsOnHand)
         {
-            var giftCardEntity = _giftCardEntityDictionary[cardsOnHand[i].CardId];
+            var giftCardEntity = _giftCardEntityDictionary[card.CardId];
 
-            if (i == cardsOnHand.Count - 1)
+            if (giftCardEntity.IsPointInsideSprite(mousePosition))
             {
-                if (giftCardEntity.IsPointInsideSprite(mousePosition))
-                {
-                    isAnyCardPointed = true;
-                    _pointedCardEntity = giftCardEntity;
-                }
-            }
-            else
-            {
-                if (giftCardEntity.IsPointInsideLeftHalfOfSprite(mousePosition))
-                {
-                    isAnyCardPointed = true;
-                    _pointedCardEntity = giftCardEntity;
-                }
+                pointedCardsOnHand.Add(giftCardEntity);
             }
         }
 
-        if (!isAnyCardPointed) _pointedCardEntity = null;
+        _pointedCardEntity = pointedCardsOnHand.MaxBy(x => x.DrawOrder);
     }
 }

@@ -2,16 +2,16 @@
 using CommonResources.Game;
 using HanamikojiMonoGameClient.Sprites;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace HanamikojiMonoGameClient.GameEntities;
 
 public class GiftCardEntity : GameEntity
 {
+    public const int DefaultDrawOrder = 50;
     public Guid CardId { get; init; }
     public GeishaType GeishaType {  get; private set; }
 
-    public GiftCardEntity(GeishaType geishaType, Guid cardId, Vector2? position = null, int drawOrder = 50) 
+    public GiftCardEntity(GeishaType geishaType, Guid cardId, Vector2? position = null, int drawOrder = DefaultDrawOrder) 
     {
         CardId = cardId;
         Sprite = SpritesProvider.GetGiftCardSprite(geishaType);

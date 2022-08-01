@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using CommonResources.Game;
@@ -107,6 +108,7 @@ namespace HanamikojiMonoGameClient
             _gameEntities.AddRange(opponentMoves);
             _gameEntities.AddRange(geishaIcons);
             _gameEntities.Add(_submitButton);
+            SortGameEntitiesByDrawOrder();
 
             _messageFont = Content.Load<SpriteFont>("messageFont");
         }
@@ -124,6 +126,7 @@ namespace HanamikojiMonoGameClient
 
             _gameEntities.AddRange(_tableManager.GiveRecentlyAddedEntities());
             _gameEntities.ForEach(x => x.Update(gameTime));
+            SortGameEntitiesByDrawOrder();
 
             _message = gameData.MessageToCurrentPlayer;
 
@@ -145,7 +148,8 @@ namespace HanamikojiMonoGameClient
             _spriteBatch.End();
             base.Draw(gameTime);
         }
-    }
 
-    
+        private void SortGameEntitiesByDrawOrder()
+            => _gameEntities.Sort((x, y) => x.DrawOrder.CompareTo(y.DrawOrder));
+    }
 }

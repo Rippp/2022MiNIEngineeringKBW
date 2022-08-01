@@ -112,6 +112,7 @@ public class InputManager
         switch (cardEntity.MoveType)
         {
             case PlayerMoveTypeEnum.Elimination:
+                _currentMoveHandler = new EliminationMoveHandler(_giftCardEntityDictionary);
                 break;
             case PlayerMoveTypeEnum.Secret:
                 _currentMoveHandler = new SecretMoveHandler(_giftCardEntityDictionary);

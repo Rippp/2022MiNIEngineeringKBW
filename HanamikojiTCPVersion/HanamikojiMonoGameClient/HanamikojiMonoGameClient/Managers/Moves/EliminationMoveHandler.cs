@@ -3,17 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using CommonResources.Game;
 using HanamikojiMonoGameClient.GameEntities;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace HanamikojiMonoGameClient.Managers.Moves;
 
-public class SecretMoveHandler : MoveHandler
+public class EliminationMoveHandler : MoveHandler
 {
     private readonly CardsOnHandSelector _cardsOnHandSelector;
-    private const int CardsToChoose = 1;
+    private const int CardsToChoose = 2;
 
-    public SecretMoveHandler(IDictionary<Guid, GiftCardEntity> giftCardEntityDictionary) : base(giftCardEntityDictionary)
+    public EliminationMoveHandler(IDictionary<Guid, GiftCardEntity> giftCardEntityDictionary) : base(giftCardEntityDictionary)
     {
         _cardsOnHandSelector = new CardsOnHandSelector(giftCardEntityDictionary);
     }
@@ -36,7 +35,7 @@ public class SecretMoveHandler : MoveHandler
 
         return new MoveData
         {
-            MoveType = PlayerMoveTypeEnum.Secret,
+            MoveType = PlayerMoveTypeEnum.Elimination,
             GiftCards = gameData.GetAllCards().Where(x => selectedCardIds.Contains(x.CardId)).ToList()
         };
     }

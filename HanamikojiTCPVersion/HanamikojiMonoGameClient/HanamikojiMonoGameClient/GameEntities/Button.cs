@@ -11,6 +11,7 @@ public class Button : GameEntity
     {
         Sprite = SpritesProvider.GetGeishaSprite(GeishaType.Geisha2_A);
         Position = new Vector2(GameSettings.WINDOW_WIDTH - SpritesProvider.GeishaSize, 0);
+        DrawOrder = 100;
     }
 
     public override void Update(GameTime gameTime)

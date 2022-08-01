@@ -18,6 +18,7 @@ public class MoveCardEntity : GameEntity
         MoveType = moveType;
         Position = position ?? _hiddenPosition;
         IsPlayerMove = isPlayerMove;
+        DrawOrder = 100;
     }
 
     public void MoveTo(Vector2 position) => Position = position;

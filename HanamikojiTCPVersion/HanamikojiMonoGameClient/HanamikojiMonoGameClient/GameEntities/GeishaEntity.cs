@@ -15,6 +15,7 @@ public class GeishaEntity : GameEntity
         Sprite = SpritesProvider.GetGeishaSprite(geishaType);
         Position = EntitiesPositions.geishaPositions[geishaType];
         GeishaType = geishaType;
+        DrawOrder = 0;
     }
 
     public override void Update(GameTime gameTime)

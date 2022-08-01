@@ -21,6 +21,7 @@ namespace HanamikojiMonoGameClient
         TcpGameClient _tcpGameClient;
         TableManager _tableManager;
         InputManager _inputManager;
+        PointedCardAnimator _pointedCardAnimator;
 
         private Button _submitButton;
 
@@ -100,6 +101,7 @@ namespace HanamikojiMonoGameClient
 
             _tableManager = new TableManager(playerMoves, opponentMoves, _giftCardEntityDictionary);
             _inputManager = new InputManager(_gameEntities, _giftCardEntityDictionary, _tcpGameClient, _submitButton);
+            _pointedCardAnimator = new PointedCardAnimator(_giftCardEntityDictionary);
 
             _gameEntities.AddRange(playerMoves);
             _gameEntities.AddRange(opponentMoves);
@@ -113,10 +115,12 @@ namespace HanamikojiMonoGameClient
         {
             // TODO: Add your update logic here
 
+            var mouseState = Mouse.GetState();
             var gameData = _tcpGameClient.GetGameData();
 
             _tableManager.Update(gameData, gameTime);
-            _inputManager.Update(gameData);
+            _inputManager.Update(gameData, mouseState);
+            _pointedCardAnimator.Update(gameData, mouseState);
 
             _gameEntities.AddRange(_tableManager.GiveRecentlyAddedEntities());
             _gameEntities.ForEach(x => x.Update(gameTime));

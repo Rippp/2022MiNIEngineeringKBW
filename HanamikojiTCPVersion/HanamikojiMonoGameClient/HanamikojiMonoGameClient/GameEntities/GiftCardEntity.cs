@@ -11,12 +11,13 @@ public class GiftCardEntity : GameEntity
     public Guid CardId { get; init; }
     public GeishaType GeishaType {  get; private set; }
 
-    public GiftCardEntity(GeishaType geishaType, Guid cardId, Vector2? position = null) 
+    public GiftCardEntity(GeishaType geishaType, Guid cardId, Vector2? position = null, int drawOrder = 50) 
     {
         CardId = cardId;
         Sprite = SpritesProvider.GetGiftCardSprite(geishaType);
         Position = position ?? new Vector2(_hiddenPosition.X, _hiddenPosition.Y);
         GeishaType = geishaType;
+        DrawOrder = drawOrder;
     }
 
     public void RevealCard(GeishaType revealedGeishaType) 

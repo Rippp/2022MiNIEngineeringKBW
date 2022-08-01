@@ -1,29 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Sockets;
 using CommonResources.Game;
 using HanamikojiClient;
 using HanamikojiMonoGameClient.GameEntities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using System.Linq;
+using HanamikojiMonoGameClient.Managers.Moves;
 
 namespace HanamikojiMonoGameClient.Managers;
 
 public class InputManager
 {
-    private readonly List<GameEntity> _gameEntities;
     private readonly TcpGameClient _tcpGameClient;
-    
-    private readonly IDictionary<Guid, GiftCardEntity> _giftCardEntityDictionary;
+    private readonly List<GameEntity> _gameEntities;
     private readonly Button _submitButton;
-    
-    private MoveCardEntity _selectedMove;
+    private readonly IDictionary<Guid, GiftCardEntity> _giftCardEntityDictionary;
+
     private GameData _lastReceivedGameData = null;
 
-    private readonly IDictionary<GiftCardEntity, DateTime> _nextPossibleCardSelectionDictionary = new Dictionary<GiftCardEntity, DateTime>();
-    private GameEntity _enlargedEntity; 
-    private readonly HashSet<GiftCardEntity> _selectedCards = new HashSet<GiftCardEntity>();
+    private MoveHandler? _currentMoveHandlerValue;
+    private MoveHandler? _currentMoveHandler
+    {
+        get => _currentMoveHandlerValue;
+        set
+        {
+            _currentMoveHandlerValue?.Clear();
+            _currentMoveHandlerValue = value;
+        }
+    }
+
+    private MoveCardEntity? _selectedMoveCardEntityValue;
+    private MoveCardEntity? _selectedMoveCardEntity
+    {
+        get => _selectedMoveCardEntityValue;
+        set
+        {
+            _selectedMoveCardEntityValue?.Enlarge(false);
+            value?.Enlarge();
+            _selectedMoveCardEntityValue = value;
+        }
+    }
 
     public InputManager(List<GameEntity> gameEntities, IDictionary<Guid, GiftCardEntity>  giftCardEntityDictionary, TcpGameClient tcpGameClient, Button submitButton)
     {
@@ -33,84 +49,72 @@ public class InputManager
         _submitButton = submitButton;
     }
 
-    public void Update(GameData gameData)
+    public void Update(GameData gameData, MouseState mouseState)
     {
-        var mouseState = Mouse.GetState();
+        var mousePosition = new Vector2(mouseState.X, mouseState.Y);
 
+        ResetIfGameDataDiffers(gameData);
+
+        if (HandleSubmitClick(gameData, mouseState, mousePosition)) return;
+
+        var clickedMoveCardEntity = GetClickedMoveCardEntity(mouseState);
+        if(clickedMoveCardEntity != null) ChangeSelectedMove(clickedMoveCardEntity);
+
+        _currentMoveHandler?.Update(gameData, mouseState);
+    }
+
+    private bool HandleSubmitClick(GameData gameData, MouseState mouseState, Vector2 mousePosition)
+    {
+        if (mouseState.LeftButton == ButtonState.Pressed && _submitButton.IsPointInsideSprite(mousePosition) && _currentMoveHandler != null && _currentMoveHandler.Validate())
+        {
+            var moveData = _currentMoveHandler.GetMoveData(gameData);
+            _tcpGameClient.SetNextMoveData(moveData);
+            return true;
+        }
+
+        return false;
+    }
+
+    private void ResetIfGameDataDiffers(GameData gameData)
+    {
         if (!gameData.Equals(_lastReceivedGameData))
         {
-            _selectedCards.Clear();
-            ClearEnlargedEntity();
-            ClearSelectedMove();
+            _currentMoveHandler?.Clear();
+            _currentMoveHandler = null;
+            _selectedMoveCardEntity = null;
+            _lastReceivedGameData = gameData;
         }
+    }
 
-        _lastReceivedGameData = gameData;
-
-            //if(mouseState.LeftButton == ButtonState.Pressed)
-            //{
-            //    // tu logika że wybieramy cos
-            //}
-            //else
-            //{
-            //    // tu logika ze najezdzamy na cos
-            //    foreach
-            //}
-
-            var mousePosition = new Vector2(mouseState.X, mouseState.Y);
-        if (mouseState.LeftButton == ButtonState.Pressed && _submitButton.IsPointInsideSprite(mousePosition) && _selectedMove != null)
+    private MoveCardEntity? GetClickedMoveCardEntity(MouseState mouseState)
+    {
+        if (mouseState.LeftButton == ButtonState.Pressed)
         {
-            var selectedCardIds = _selectedCards.Select(x => x.CardId).ToList();
-
-            // walidacja?
-            
-            _tcpGameClient.SetNextMoveData(new MoveData
+            foreach (var entity in _gameEntities)
             {
-                MoveType = _selectedMove.MoveType,
-                GiftCards = gameData.GetAllCards().Where(x => selectedCardIds.Contains(x.CardId)).ToList()
-            });
-
-            return;
+                if (entity.IsPointInsideSprite(new Vector2(mouseState.Position.X, mouseState.Position.Y)))
+                {
+                    if (entity is MoveCardEntity { IsPlayerMove: true } cardEntity)
+                    {
+                        return cardEntity;
+                    }
+                }
+            }
         }
 
-        switch (_selectedMove?.MoveType)
+        return null;
+    }
+
+    private void ChangeSelectedMove(MoveCardEntity cardEntity)
+    {
+        _selectedMoveCardEntity = cardEntity;
+
+        switch (cardEntity.MoveType)
         {
             case PlayerMoveTypeEnum.Elimination:
                 break;
             case PlayerMoveTypeEnum.Secret:
-                
-
-                bool isAnyCardPointed = false;
-                foreach(var card in gameData.CurrentPlayerData.CardsOnHand)
-                {
-                    var cardEntity = _giftCardEntityDictionary[card.CardId];
-
-                    if (cardEntity.IsPointInsideLeftHalfOfSprite(mousePosition))
-                    {
-                        isAnyCardPointed = true;
-
-                        if (mouseState.LeftButton == ButtonState.Pressed)
-                        {
-                            if (_selectedCards.Contains(cardEntity))
-                            {
-                                DeselectCard(cardEntity);
-                            }
-                            else
-                            {
-                                SelectCard(cardEntity);
-                            }
-                        }
-                        else
-                        {
-                            ChangeEnlargedEntity(cardEntity);
-                        }
-                    }
-                }
-
-                if (!isAnyCardPointed)
-                {
-                    ClearEnlargedEntity();
-                }
-
+                _currentMoveHandler = new SecretMoveHandler(_giftCardEntityDictionary);
                 break;
             case PlayerMoveTypeEnum.DoubleGift:
                 break;
@@ -124,66 +128,8 @@ public class InputManager
                 break;
             case PlayerMoveTypeEnum.CompromiseResponse:
                 break;
-            case null:
-                break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
-
-        if (mouseState.LeftButton == ButtonState.Pressed)
-        {
-            foreach (var entity in _gameEntities)
-            {
-                if (entity.IsPointInsideSprite(new Vector2(mouseState.Position.X, mouseState.Position.Y)))
-                {
-                    if (entity is MoveCardEntity {IsPlayerMove: true} cardEntity)
-                    {
-                        ChangeSelectedMove(cardEntity);
-                    }
-                }
-            }
-        }
-    }
-
-    private void ClearEnlargedEntity()
-    {
-        _enlargedEntity?.Enlarge(false);
-        _enlargedEntity = null;
-    }
-
-    private void ClearSelectedMove()
-    {
-        _selectedMove?.Enlarge(false);
-        _selectedMove = null;
-    }
-
-    private void SelectCard(GiftCardEntity cardEntity)
-    {
-        if (_nextPossibleCardSelectionDictionary.ContainsKey(cardEntity) && DateTime.Now < _nextPossibleCardSelectionDictionary[cardEntity]) return;
-        cardEntity.MoveInY(-50);
-        _selectedCards.Add(cardEntity);
-        _nextPossibleCardSelectionDictionary[cardEntity] = DateTime.Now.AddMilliseconds(GameSettings.MILISECONDS_BETWEEN_ACTIONS);
-    }
-
-    private void DeselectCard(GiftCardEntity cardEntity)
-    {
-        if (_nextPossibleCardSelectionDictionary.ContainsKey(cardEntity) && DateTime.Now < _nextPossibleCardSelectionDictionary[cardEntity]) return;
-        cardEntity.MoveInY(50);
-        _selectedCards.Remove(cardEntity);
-        _nextPossibleCardSelectionDictionary[cardEntity] = DateTime.Now.AddMilliseconds(GameSettings.MILISECONDS_BETWEEN_ACTIONS);
-    }
-
-    private void ChangeEnlargedEntity(GameEntity entityToEnlarge)
-    {
-        _enlargedEntity?.Enlarge(false);
-        _enlargedEntity = entityToEnlarge;
-        _enlargedEntity.Enlarge();
-    }
-
-    private void ChangeSelectedMove(MoveCardEntity cardEntity)
-    {
-        _selectedMove?.Enlarge(false);
-        _selectedMove = cardEntity;
-        cardEntity.Enlarge();
     }
 }

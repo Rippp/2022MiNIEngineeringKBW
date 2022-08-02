@@ -47,13 +47,11 @@ namespace CommonResources.Game
 
         public void AddSecretCard(GiftCard secretCard)
         {
-            if (SecretCard != null) throw new Exception("Secret card is already set");
             SecretCard = secretCard;
         }
 
         public void AddEliminationCards(List<GiftCard> eliminationCards)
         {
-            if (EliminationCards != null) throw new Exception("Elimination cards are already set");
             EliminationCards = eliminationCards.ToList();
         }
 

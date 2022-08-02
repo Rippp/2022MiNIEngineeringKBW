@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CommonResources.Game;
 using HanamikojiMonoGameClient.GameEntities;
+using HanamikojiMonoGameClient.Managers.Moves.Helpers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
@@ -13,9 +14,9 @@ public class SecretMoveHandler : MoveHandler
     private readonly CardsOnHandSelector _cardsOnHandSelector;
     private const int CardsToChoose = 1;
 
-    public SecretMoveHandler(IDictionary<Guid, GiftCardEntity> giftCardEntityDictionary) : base(giftCardEntityDictionary)
+    public SecretMoveHandler(IEntitiesRepository entitiesRepository, CardsOnHandSelector cardsOnHandSelector) : base(entitiesRepository)
     {
-        _cardsOnHandSelector = new CardsOnHandSelector(giftCardEntityDictionary);
+        _cardsOnHandSelector = cardsOnHandSelector;
     }
 
     public override void Update(GameData gameData, MouseState mouseState)
@@ -25,6 +26,7 @@ public class SecretMoveHandler : MoveHandler
 
     public override bool Validate()
     {
+        return true;
         var selectedCards = _cardsOnHandSelector.GetSelectedCardEntities();
         // print validation info?
         return selectedCards.Count == CardsToChoose;

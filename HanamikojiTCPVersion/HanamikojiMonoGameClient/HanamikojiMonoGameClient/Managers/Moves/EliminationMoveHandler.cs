@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using CommonResources.Game;
-using HanamikojiMonoGameClient.GameEntities;
+using HanamikojiMonoGameClient.Managers.Moves.Helpers;
 using Microsoft.Xna.Framework.Input;
 
 namespace HanamikojiMonoGameClient.Managers.Moves;
@@ -12,9 +10,9 @@ public class EliminationMoveHandler : MoveHandler
     private readonly CardsOnHandSelector _cardsOnHandSelector;
     private const int CardsToChoose = 2;
 
-    public EliminationMoveHandler(IDictionary<Guid, GiftCardEntity> giftCardEntityDictionary) : base(giftCardEntityDictionary)
+    public EliminationMoveHandler(IEntitiesRepository entitiesRepository, CardsOnHandSelector cardsOnHandSelector) : base(entitiesRepository)
     {
-        _cardsOnHandSelector = new CardsOnHandSelector(giftCardEntityDictionary);
+        _cardsOnHandSelector = cardsOnHandSelector;
     }
 
     public override void Update(GameData gameData, MouseState mouseState)

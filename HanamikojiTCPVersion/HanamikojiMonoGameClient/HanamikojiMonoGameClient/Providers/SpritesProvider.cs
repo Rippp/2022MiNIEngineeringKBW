@@ -1,9 +1,10 @@
 ﻿using System;
 using CommonResources.Game;
+using HanamikojiMonoGameClient.Sprites;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace HanamikojiMonoGameClient.Sprites
+namespace HanamikojiMonoGameClient.Providers
 {
     public static class SpritesProvider
     {

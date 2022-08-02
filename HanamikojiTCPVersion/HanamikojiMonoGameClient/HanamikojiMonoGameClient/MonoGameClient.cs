@@ -5,6 +5,7 @@ using CommonResources.Game;
 using HanamikojiClient;
 using HanamikojiMonoGameClient.GameEntities;
 using HanamikojiMonoGameClient.Managers;
+using HanamikojiMonoGameClient.Providers;
 using HanamikojiMonoGameClient.Sprites;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -12,34 +13,49 @@ using Microsoft.Xna.Framework.Input;
 
 namespace HanamikojiMonoGameClient
 {
-    public class MonoGameClient : Game
+    public class MonoGameClient : Game, IGame
     {
+        public Game Game => this;
+
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        TcpGameClient _tcpGameClient;
+        private ITcpGameClientProvider _tcpGameClientProvider;
+
         TableManager _tableManager;
         InputManager _inputManager;
-        PointedCardAnimator _pointedCardAnimator;
+        IPointedCardAnimator _pointedCardAnimator;
+        IPointedEntityProvider _pointedEntityProvider;
+
+        private IEntitiesRepository _entitiesRepository;
 
         private Button _submitButton;
 
-        private List<GameEntity> _gameEntities;
-        private IDictionary<Guid, GiftCardEntity> _giftCardEntityDictionary = new Dictionary<Guid, GiftCardEntity>();
+        
 
         private SpriteFont _messageFont;
         private string _message;
 
-        public MonoGameClient(TcpGameClient tcpGameClient)
+        public MonoGameClient(
+            ITcpGameClientProvider tcpGameClientProvider, 
+            TableManager tableManager,
+            InputManager inputManager, 
+            IEntitiesRepository entitiesRepository, 
+            IPointedCardAnimator pointedCardAnimator, 
+            IPointedEntityProvider pointedEntityProvider)
         {
-            _tcpGameClient = tcpGameClient;
+            _tcpGameClientProvider = tcpGameClientProvider;
+            _tableManager = tableManager;
+            _inputManager = inputManager;
+            _entitiesRepository = entitiesRepository;
+            _pointedCardAnimator = pointedCardAnimator;
+            _pointedEntityProvider = pointedEntityProvider;
+
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
 
-            _gameEntities = new List<GameEntity>();
-
-
+            var tcpGameClient = tcpGameClientProvider.GetTcpGameClient();
 
             Task.Run(() =>
             {
@@ -69,44 +85,9 @@ namespace HanamikojiMonoGameClient
             SpritesProvider.LoadTexture(this);
 
             // TODO: can be moved to TableManager constructor
-            var playerMoves = new List<MoveCardEntity>
-            {
-                new MoveCardEntity(PlayerMoveTypeEnum.Secret, true),
-                new MoveCardEntity(PlayerMoveTypeEnum.Compromise, true),
-                new MoveCardEntity(PlayerMoveTypeEnum.DoubleGift, true),
-                new MoveCardEntity(PlayerMoveTypeEnum.Elimination, true),
-            };
-
-            var opponentMoves = new List<MoveCardEntity>
-            {
-                new MoveCardEntity(PlayerMoveTypeEnum.Secret, false),
-                new MoveCardEntity(PlayerMoveTypeEnum.Compromise, false),
-                new MoveCardEntity(PlayerMoveTypeEnum.DoubleGift, false),
-                new MoveCardEntity(PlayerMoveTypeEnum.Elimination, false),
-            };
-
-            var geishaIcons = new List<GeishaEntity>
-            {
-                new GeishaEntity(GeishaType.Geisha2_A),
-                new GeishaEntity(GeishaType.Geisha2_B),
-                new GeishaEntity(GeishaType.Geisha2_C),
-                new GeishaEntity(GeishaType.Geisha3_A),
-                new GeishaEntity(GeishaType.Geisha3_B),
-                new GeishaEntity(GeishaType.Geisha4_A),
-                new GeishaEntity(GeishaType.Geisha5_A),
-            };
-
+            
             _submitButton = new Button();
-
-            _tableManager = new TableManager(playerMoves, opponentMoves, _giftCardEntityDictionary);
-            _inputManager = new InputManager(_gameEntities, _giftCardEntityDictionary, _tcpGameClient, _submitButton);
-            _pointedCardAnimator = new PointedCardAnimator(_giftCardEntityDictionary);
-
-            _gameEntities.AddRange(playerMoves);
-            _gameEntities.AddRange(opponentMoves);
-            _gameEntities.AddRange(geishaIcons);
-            _gameEntities.Add(_submitButton);
-            SortGameEntitiesByDrawOrder();
+            _entitiesRepository.SetSubmitButtonEntity(_submitButton);
 
             _messageFont = Content.Load<SpriteFont>("messageFont");
         }
@@ -116,15 +97,13 @@ namespace HanamikojiMonoGameClient
             // TODO: Add your update logic here
 
             var mouseState = Mouse.GetState();
-            var gameData = _tcpGameClient.GetGameData();
+            var gameData = _tcpGameClientProvider.GetTcpGameClient().GetGameData();
 
             _tableManager.Update(gameData, gameTime);
-            _inputManager.Update(gameData, mouseState);
+            _pointedEntityProvider.Update(gameData, mouseState);
             _pointedCardAnimator.Update(gameData, mouseState);
-
-            _gameEntities.AddRange(_tableManager.GiveRecentlyAddedEntities());
-            _gameEntities.ForEach(x => x.Update(gameTime));
-            SortGameEntitiesByDrawOrder();
+            _entitiesRepository.Update(gameTime);
+            _inputManager.Update(gameData, mouseState);
 
             _message = gameData.MessageToCurrentPlayer;
 
@@ -137,17 +116,16 @@ namespace HanamikojiMonoGameClient
 
             _spriteBatch.Begin();
 
-            // TODO: Add your drawing code here
-
-            _gameEntities.ForEach(x => x.Draw(_spriteBatch, gameTime));
+            var cardEntities = _entitiesRepository.GetAll(); 
+            foreach (var cardEntity in cardEntities)
+            {
+                cardEntity.Draw(_spriteBatch, gameTime);
+            }
 
             _spriteBatch.DrawString(_messageFont, _message, new Vector2(0, 0), Color.Black);
 
             _spriteBatch.End();
             base.Draw(gameTime);
         }
-
-        private void SortGameEntitiesByDrawOrder()
-            => _gameEntities.Sort((x, y) => x.DrawOrder.CompareTo(y.DrawOrder));
     }
 }

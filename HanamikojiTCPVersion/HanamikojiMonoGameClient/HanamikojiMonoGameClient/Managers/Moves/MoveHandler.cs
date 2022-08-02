@@ -6,13 +6,13 @@ using Microsoft.Xna.Framework.Input;
 
 namespace HanamikojiMonoGameClient.Managers.Moves;
 
-public abstract class MoveHandler 
+public abstract class MoveHandler
 {
-    protected readonly IDictionary<Guid, GiftCardEntity> _giftCardEntityDictionary;
+    protected IEntitiesRepository EntitiesRepository;
 
-    protected MoveHandler(IDictionary<Guid, GiftCardEntity> giftCardEntityDictionary)
+    protected MoveHandler(IEntitiesRepository entitiesRepository)
     {
-        _giftCardEntityDictionary = giftCardEntityDictionary;
+        EntitiesRepository = entitiesRepository;
     }
 
     public abstract void Update(GameData gameData, MouseState mouseState);

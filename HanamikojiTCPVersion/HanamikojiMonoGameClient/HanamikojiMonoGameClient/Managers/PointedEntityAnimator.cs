@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using CommonResources.Game;
 using HanamikojiMonoGameClient.GameEntities;
-using Microsoft.Xna.Framework;
+using HanamikojiMonoGameClient.Providers;
 using Microsoft.Xna.Framework.Input;
 
 namespace HanamikojiMonoGameClient.Managers;
 
-public class PointedCardAnimator
+public class PointedCardAnimator : IPointedCardAnimator
 {
-    private readonly IDictionary<Guid, GiftCardEntity> _giftCardEntityDictionary;
+    private readonly IPointedEntityProvider _pointedEntityProvider;
 
     private GiftCardEntity? _pointedCardEntityValue = null;
     private GiftCardEntity? _pointedCardEntity
@@ -24,28 +24,18 @@ public class PointedCardAnimator
         }
     }
 
-    public PointedCardAnimator(IDictionary<Guid, GiftCardEntity> giftCardEntityDictionary)
+    public PointedCardAnimator(IPointedEntityProvider pointedEntityProvider)
     {
-        _giftCardEntityDictionary = giftCardEntityDictionary;
+        _pointedEntityProvider = pointedEntityProvider;
     }
 
     public void Update(GameData gameData, MouseState mouseState)
     {
-        var cardsOnHand = gameData.CurrentPlayerData.CardsOnHand;
-        var mousePosition = new Vector2(mouseState.X, mouseState.Y);
-
-        var pointedCardsOnHand = new List<GiftCardEntity>();
-
-        foreach (var card in cardsOnHand)
-        {
-            var giftCardEntity = _giftCardEntityDictionary[card.CardId];
-
-            if (giftCardEntity.IsPointInsideSprite(mousePosition))
-            {
-                pointedCardsOnHand.Add(giftCardEntity);
-            }
-        }
-
-        _pointedCardEntity = pointedCardsOnHand.MaxBy(x => x.DrawOrder);
+        _pointedCardEntity = _pointedEntityProvider.GetPointedCardOnHand(gameData, mouseState);
     }
+}
+
+public interface IPointedCardAnimator
+{
+    public void Update(GameData gameData, MouseState mouseState);
 }

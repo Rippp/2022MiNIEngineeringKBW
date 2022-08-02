@@ -3,42 +3,36 @@ using System.Collections.Generic;
 using System.Linq;
 using CommonResources.Game;
 using HanamikojiMonoGameClient.GameEntities;
-using Microsoft.Xna.Framework;
+using HanamikojiMonoGameClient.Providers;
 using Microsoft.Xna.Framework.Input;
 
-namespace HanamikojiMonoGameClient.Managers;
+namespace HanamikojiMonoGameClient.Managers.Moves.Helpers;
 
 public class CardsOnHandSelector
 {
     private readonly IDictionary<GiftCardEntity, DateTime> _nextPossibleCardSelectionDictionary = new Dictionary<GiftCardEntity, DateTime>();
     private readonly HashSet<GiftCardEntity> _selectedCards = new HashSet<GiftCardEntity>();
-    private readonly IDictionary<Guid, GiftCardEntity> _giftCardEntityDictionary;
+    private IPointedEntityProvider _pointedEntityProvider;
 
-    public CardsOnHandSelector(IDictionary<Guid, GiftCardEntity> giftCardEntityDictionary)
+    public CardsOnHandSelector(IPointedEntityProvider pointedEntityProvider)
     {
-        _giftCardEntityDictionary = giftCardEntityDictionary;
+        _pointedEntityProvider = pointedEntityProvider;
     }
 
     public void Update(GameData gameData, MouseState mouseState)
     {
-        var mousePosition = new Vector2(mouseState.X, mouseState.Y);
-
-        foreach (var card in gameData.CurrentPlayerData.CardsOnHand)
+        if (mouseState.LeftButton == ButtonState.Pressed)
         {
-            var cardEntity = _giftCardEntityDictionary[card.CardId];
-
-            if (cardEntity.IsPointInsideLeftHalfOfSprite(mousePosition))
+            var clickedCardEntity = _pointedEntityProvider.GetPointedCardOnHand(gameData, mouseState);
+            if (clickedCardEntity != null)
             {
-                if (mouseState.LeftButton == ButtonState.Pressed)
+                if (_selectedCards.Contains(clickedCardEntity))
                 {
-                    if (_selectedCards.Contains(cardEntity))
-                    {
-                        DeselectCard(cardEntity);
-                    }
-                    else
-                    {
-                        SelectCard(cardEntity);
-                    }
+                    DeselectCard(clickedCardEntity);
+                }
+                else
+                {
+                    SelectCard(clickedCardEntity);
                 }
             }
         }

@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
+using HanamikojiMonoGameClient.Animations.Entries;
 using HanamikojiMonoGameClient.GameEntities;
 using Microsoft.Xna.Framework;
 
-namespace HanamikojiMonoGameClient.Managers;
+namespace HanamikojiMonoGameClient.Animations;
 
 public class AnimationManager
 {
@@ -26,8 +25,6 @@ public class AnimationManager
     {
         _currentRotationAnimationEntries[giftCard] = new RotationAnimationEntry(giftCard.Rotation, targetRotation, GameSettings.DEFAULT_ANIMATION_DURATION);
     }
-
-
 
     public void Update(GameTime gameTime)
     {
@@ -74,56 +71,9 @@ public class AnimationManager
 }
 
 
-public abstract record AnimationEntry
-{
-    public TimeSpan Duration { get; set; }
-    public float Progress => _isLinear ? _progress : EaseInOut(_progress);
-    protected bool _isLinear { get; init; }
-    protected float _progress = 0;
-    protected TimeSpan _timePassed = TimeSpan.Zero;
-
-    public bool Update(TimeSpan elapsed)
-    {
-        _timePassed += elapsed;
-        _progress = (float)Math.Min(_timePassed.TotalMilliseconds / Duration.TotalMilliseconds, 1);
-        return _timePassed >= Duration;
-    }
-
-    public static float EaseInOut(float t)
-    {
-        return t * t * (3.0f - 2.0f * t);
-    }
-}
 
 
-public record RotationAnimationEntry : AnimationEntry
-{
-    public float StartRotation { get; init; }
-    public float TargetRotation { get; init; }
-    public float CurrentRotation => StartRotation + (TargetRotation - StartRotation) * Progress;
 
-    public RotationAnimationEntry(float startRotation, float targetRotation, TimeSpan duration, bool isLinear = false)
-    {
-        StartRotation = startRotation;
-        TargetRotation = targetRotation;
-        Duration = duration;
-        _isLinear = isLinear;
-    }
-}
 
-public record MoveAnimationEntry : AnimationEntry
-{
-    public Vector2 Start { get; private set; }
-    public Vector2 Destination { get; private set; }
-    public Vector2 CurrentPosition => Vector2.Lerp(Start, Destination, Progress);
-
-    public MoveAnimationEntry(Vector2 start, Vector2 destination, TimeSpan duration, bool isLinear = false)
-    {
-        Start = start;
-        Destination = destination;
-        Duration = duration;
-        _isLinear = isLinear;
-    }
-}
 
 

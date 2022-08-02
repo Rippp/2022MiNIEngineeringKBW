@@ -1,5 +1,6 @@
 ﻿using System;
 using CommonResources.Game;
+using HanamikojiMonoGameClient.Providers;
 using HanamikojiMonoGameClient.Sprites;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

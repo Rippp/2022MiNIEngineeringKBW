@@ -6,15 +6,15 @@ using HanamikojiMonoGameClient.GameEntities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using HanamikojiMonoGameClient.Managers.Moves;
+using HanamikojiMonoGameClient.Providers;
 
 namespace HanamikojiMonoGameClient.Managers;
 
 public class InputManager
 {
-    private readonly TcpGameClient _tcpGameClient;
-    private readonly List<GameEntity> _gameEntities;
-    private readonly Button _submitButton;
-    private readonly IDictionary<Guid, GiftCardEntity> _giftCardEntityDictionary;
+    private ITcpGameClientProvider _tcpClientProvider;
+    private IEntitiesRepository _entitiesRepository;
+    private IMoveHandlerProvider _moveHandlerProvider;
 
     private GameData _lastReceivedGameData = null;
 
@@ -41,12 +41,11 @@ public class InputManager
         }
     }
 
-    public InputManager(List<GameEntity> gameEntities, IDictionary<Guid, GiftCardEntity>  giftCardEntityDictionary, TcpGameClient tcpGameClient, Button submitButton)
+    public InputManager(IEntitiesRepository entitiesRepository, IMoveHandlerProvider moveHandlerProvider, ITcpGameClientProvider tcpClientProvider)
     {
-        _gameEntities = gameEntities;
-        _giftCardEntityDictionary = giftCardEntityDictionary;
-        _tcpGameClient = tcpGameClient;
-        _submitButton = submitButton;
+        _entitiesRepository = entitiesRepository;
+        _moveHandlerProvider = moveHandlerProvider;
+        _tcpClientProvider = tcpClientProvider;
     }
 
     public void Update(GameData gameData, MouseState mouseState)
@@ -65,10 +64,13 @@ public class InputManager
 
     private bool HandleSubmitClick(GameData gameData, MouseState mouseState, Vector2 mousePosition)
     {
-        if (mouseState.LeftButton == ButtonState.Pressed && _submitButton.IsPointInsideSprite(mousePosition) && _currentMoveHandler != null && _currentMoveHandler.Validate())
+        if (mouseState.LeftButton == ButtonState.Pressed &&
+            _entitiesRepository.GetSubmitButton().IsPointInsideSprite(mousePosition) && 
+            _currentMoveHandler != null 
+            && _currentMoveHandler.Validate())
         {
             var moveData = _currentMoveHandler.GetMoveData(gameData);
-            _tcpGameClient.SetNextMoveData(moveData);
+            _tcpClientProvider.GetTcpGameClient().SetNextMoveData(moveData);
             return true;
         }
 
@@ -90,7 +92,7 @@ public class InputManager
     {
         if (mouseState.LeftButton == ButtonState.Pressed)
         {
-            foreach (var entity in _gameEntities)
+            foreach (var entity in _entitiesRepository.GetAll())
             {
                 if (entity.IsPointInsideSprite(new Vector2(mouseState.Position.X, mouseState.Position.Y)))
                 {
@@ -108,29 +110,6 @@ public class InputManager
     private void ChangeSelectedMove(MoveCardEntity cardEntity)
     {
         _selectedMoveCardEntity = cardEntity;
-
-        switch (cardEntity.MoveType)
-        {
-            case PlayerMoveTypeEnum.Elimination:
-                _currentMoveHandler = new EliminationMoveHandler(_giftCardEntityDictionary);
-                break;
-            case PlayerMoveTypeEnum.Secret:
-                _currentMoveHandler = new SecretMoveHandler(_giftCardEntityDictionary);
-                break;
-            case PlayerMoveTypeEnum.DoubleGift:
-                break;
-            case PlayerMoveTypeEnum.Compromise:
-                break;
-            case PlayerMoveTypeEnum.DoubleGiftOffer:
-                break;
-            case PlayerMoveTypeEnum.CompromiseOffer:
-                break;
-            case PlayerMoveTypeEnum.DoubleGiftResponse:
-                break;
-            case PlayerMoveTypeEnum.CompromiseResponse:
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+        _currentMoveHandler = _moveHandlerProvider.GetMoveHandler(cardEntity.MoveType);
     }
 }

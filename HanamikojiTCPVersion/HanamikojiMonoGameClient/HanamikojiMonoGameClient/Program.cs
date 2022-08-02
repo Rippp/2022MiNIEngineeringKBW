@@ -37,6 +37,7 @@ namespace HanamikojiMonoGameClient
             services.AddSingleton<SecretMoveHandler>();
             services.AddSingleton<EliminationMoveHandler>();
             services.AddSingleton<CardsOnHandSelector>();
+            services.AddSingleton<ClickedEntityProvider>();
         }
     }
     

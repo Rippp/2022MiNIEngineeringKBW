@@ -26,6 +26,7 @@ namespace HanamikojiMonoGameClient
         InputManager _inputManager;
         IPointedCardAnimator _pointedCardAnimator;
         IPointedEntityProvider _pointedEntityProvider;
+        ClickedEntityProvider _clickedEntityProvider;
 
         private IEntitiesRepository _entitiesRepository;
 
@@ -42,7 +43,8 @@ namespace HanamikojiMonoGameClient
             InputManager inputManager, 
             IEntitiesRepository entitiesRepository, 
             IPointedCardAnimator pointedCardAnimator, 
-            IPointedEntityProvider pointedEntityProvider)
+            IPointedEntityProvider pointedEntityProvider,
+            ClickedEntityProvider clickedEntityProvider)
         {
             _tcpGameClientProvider = tcpGameClientProvider;
             _tableManager = tableManager;
@@ -50,6 +52,7 @@ namespace HanamikojiMonoGameClient
             _entitiesRepository = entitiesRepository;
             _pointedCardAnimator = pointedCardAnimator;
             _pointedEntityProvider = pointedEntityProvider;
+            _clickedEntityProvider = clickedEntityProvider;
 
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
@@ -104,6 +107,7 @@ namespace HanamikojiMonoGameClient
             _pointedCardAnimator.Update(gameData, mouseState);
             _entitiesRepository.Update(gameTime);
             _inputManager.Update(gameData, mouseState);
+            _clickedEntityProvider.Update(gameData, mouseState);
 
             _message = gameData.MessageToCurrentPlayer;
 

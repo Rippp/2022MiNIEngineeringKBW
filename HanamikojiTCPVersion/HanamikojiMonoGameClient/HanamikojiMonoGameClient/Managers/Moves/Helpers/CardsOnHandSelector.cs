@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using CommonResources.Game;
 using HanamikojiMonoGameClient.GameEntities;
-using HanamikojiMonoGameClient.Providers;
 using Microsoft.Xna.Framework.Input;
 
 namespace HanamikojiMonoGameClient.Managers.Moves.Helpers;
@@ -12,28 +11,26 @@ public class CardsOnHandSelector
 {
     private readonly IDictionary<GiftCardEntity, DateTime> _nextPossibleCardSelectionDictionary = new Dictionary<GiftCardEntity, DateTime>();
     private readonly HashSet<GiftCardEntity> _selectedCards = new HashSet<GiftCardEntity>();
-    private IPointedEntityProvider _pointedEntityProvider;
+    private ClickedEntityProvider _clickedEntityProvider;
 
-    public CardsOnHandSelector(IPointedEntityProvider pointedEntityProvider)
+    public CardsOnHandSelector(ClickedEntityProvider clickedEntityProvider)
     {
-        _pointedEntityProvider = pointedEntityProvider;
+        _clickedEntityProvider = clickedEntityProvider;
     }
 
     public void Update(GameData gameData, MouseState mouseState)
     {
-        if (mouseState.LeftButton == ButtonState.Pressed)
+        var clickedCardEntity = _clickedEntityProvider.GetClickedCardOnHandEntity();
+
+        if(clickedCardEntity != null)
         {
-            var clickedCardEntity = _pointedEntityProvider.GetPointedCardOnHand(gameData, mouseState);
-            if (clickedCardEntity != null)
+            if (_selectedCards.Contains(clickedCardEntity))
             {
-                if (_selectedCards.Contains(clickedCardEntity))
-                {
-                    DeselectCard(clickedCardEntity);
-                }
-                else
-                {
-                    SelectCard(clickedCardEntity);
-                }
+                DeselectCard(clickedCardEntity);
+            }
+            else
+            {
+                SelectCard(clickedCardEntity);
             }
         }
     }

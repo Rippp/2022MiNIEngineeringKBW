@@ -25,7 +25,7 @@ namespace HanamikojiMonoGameClient
         TableManager _tableManager;
         InputManager _inputManager;
         IPointedCardAnimator _pointedCardAnimator;
-        IPointedEntityProvider _pointedEntityProvider;
+        PointedEntityProvider _pointedEntityProvider;
         ClickedEntityProvider _clickedEntityProvider;
 
         private IEntitiesRepository _entitiesRepository;
@@ -42,8 +42,8 @@ namespace HanamikojiMonoGameClient
             TableManager tableManager,
             InputManager inputManager, 
             IEntitiesRepository entitiesRepository, 
-            IPointedCardAnimator pointedCardAnimator, 
-            IPointedEntityProvider pointedEntityProvider,
+            IPointedCardAnimator pointedCardAnimator,
+            PointedEntityProvider pointedEntityProvider,
             ClickedEntityProvider clickedEntityProvider)
         {
             _tcpGameClientProvider = tcpGameClientProvider;

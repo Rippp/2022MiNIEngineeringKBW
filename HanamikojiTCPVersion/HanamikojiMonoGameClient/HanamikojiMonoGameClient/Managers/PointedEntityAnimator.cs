@@ -10,7 +10,7 @@ namespace HanamikojiMonoGameClient.Managers;
 
 public class PointedCardAnimator : IPointedCardAnimator
 {
-    private readonly IPointedEntityProvider _pointedEntityProvider;
+    private readonly PointedEntityProvider _pointedEntityProvider;
 
     private GiftCardEntity? _pointedCardEntityValue = null;
     private GiftCardEntity? _pointedCardEntity
@@ -24,7 +24,25 @@ public class PointedCardAnimator : IPointedCardAnimator
         }
     }
 
-    public PointedCardAnimator(IPointedEntityProvider pointedEntityProvider)
+    private List<GiftCardEntity> _pointedGiftCardOfferEntitiesValue = null;
+    private List<GiftCardEntity> _pointedGiftCardOfferEntities
+    {
+        get => _pointedGiftCardOfferEntitiesValue;
+        set
+        {
+            if(_pointedGiftCardOfferEntitiesValue != null)
+                foreach(var cardEntity in _pointedGiftCardOfferEntitiesValue) 
+                    cardEntity.Enlarge(false);
+
+            if (value != null)
+                foreach (var cardEntity in value)
+                    cardEntity.Enlarge(true);
+
+            _pointedGiftCardOfferEntitiesValue = value;
+        }
+    }
+
+    public PointedCardAnimator(PointedEntityProvider pointedEntityProvider)
     {
         _pointedEntityProvider = pointedEntityProvider;
     }
@@ -32,6 +50,8 @@ public class PointedCardAnimator : IPointedCardAnimator
     public void Update(GameData gameData, MouseState mouseState)
     {
         _pointedCardEntity = _pointedEntityProvider.GetPointedCardOnHand(gameData, mouseState);
+
+        _pointedGiftCardOfferEntities = _pointedEntityProvider.GetPointedDoubleGiftOfferCards(gameData, mouseState);
     }
 }
 

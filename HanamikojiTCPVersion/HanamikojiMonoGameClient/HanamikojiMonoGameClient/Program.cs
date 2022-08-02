@@ -24,7 +24,7 @@ namespace HanamikojiMonoGameClient
         {
             services.AddHostedService<GameWorker>();
 
-            services.AddSingleton<IPointedEntityProvider ,PointedEntityProvider>();
+            services.AddSingleton<PointedEntityProvider>();
             services.AddSingleton<IGame, MonoGameClient>();
             services.AddSingleton<ITcpGameClientProvider, TcpGameClientProvider>();
             services.AddSingleton<IEntitiesRepository, GameEntitiesRepository>();
@@ -36,6 +36,8 @@ namespace HanamikojiMonoGameClient
             services.AddSingleton<IMoveHandlerProvider, MoveHandlerProvider>();
             services.AddSingleton<SecretMoveHandler>();
             services.AddSingleton<EliminationMoveHandler>();
+            services.AddSingleton<DoubleGiftMoveHandler>();
+            services.AddSingleton<DoubleGiftOfferResponseMoveHandler>();
             services.AddSingleton<CardsOnHandSelector>();
             services.AddSingleton<ClickedEntityProvider>();
         }

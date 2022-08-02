@@ -38,6 +38,8 @@ namespace CommonResources.Game
         public static GameData DeserializeFromJson(string jsonData)
             => JsonConvert.DeserializeObject<GameData>(jsonData);
 
+        public bool IsMovePossible(PlayerMoveTypeEnum moveType) => CurrentPossibleMoves.Contains(moveType); 
+
         public override bool Equals(object? obj)
         {
             if ((obj == null) || this.GetType() != obj.GetType())

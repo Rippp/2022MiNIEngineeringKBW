@@ -8,11 +8,19 @@ public class MoveHandlerProvider : IMoveHandlerProvider
 {
     private readonly SecretMoveHandler _secretMoveHandler;
     private readonly EliminationMoveHandler _eliminationMoveHandler;
+    private readonly DoubleGiftMoveHandler _doubleGiftMoveHandler;
+    private readonly DoubleGiftOfferResponseMoveHandler _doubleGiftOfferMoveHandler;
 
-    public MoveHandlerProvider(SecretMoveHandler secretMoveHandler, EliminationMoveHandler eliminationMoveHandler)
+    public MoveHandlerProvider(
+        SecretMoveHandler secretMoveHandler, 
+        EliminationMoveHandler eliminationMoveHandler, 
+        DoubleGiftMoveHandler doubleGiftMoveHandler,
+        DoubleGiftOfferResponseMoveHandler doubleGiftOfferMoveHandler)
     {
         _secretMoveHandler = secretMoveHandler;
         _eliminationMoveHandler = eliminationMoveHandler;
+        _doubleGiftMoveHandler = doubleGiftMoveHandler;
+        _doubleGiftOfferMoveHandler = doubleGiftOfferMoveHandler;
     }
 
     public MoveHandler GetMoveHandler(PlayerMoveTypeEnum moveType)
@@ -24,16 +32,12 @@ public class MoveHandlerProvider : IMoveHandlerProvider
             case PlayerMoveTypeEnum.Secret:
                 return _secretMoveHandler;
             case PlayerMoveTypeEnum.DoubleGift:
-                break;
+                return _doubleGiftMoveHandler;
             case PlayerMoveTypeEnum.Compromise:
                 break;
             case PlayerMoveTypeEnum.DoubleGiftOffer:
-                break;
+                return _doubleGiftOfferMoveHandler;
             case PlayerMoveTypeEnum.CompromiseOffer:
-                break;
-            case PlayerMoveTypeEnum.DoubleGiftResponse:
-                break;
-            case PlayerMoveTypeEnum.CompromiseResponse:
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

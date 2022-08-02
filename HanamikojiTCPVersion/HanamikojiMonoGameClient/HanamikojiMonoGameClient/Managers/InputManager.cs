@@ -55,9 +55,18 @@ public class InputManager
         ResetIfGameDataDiffers(gameData);
 
         if (HandleSubmitClick(gameData, mouseState, mousePosition)) return;
-
-        var clickedMoveCardEntity = GetClickedMoveCardEntity(mouseState);
-        if(clickedMoveCardEntity != null) ChangeSelectedMove(clickedMoveCardEntity);
+        
+        // Do wyniesienia
+        if (_lastReceivedGameData.IsMovePossible(PlayerMoveTypeEnum.DoubleGiftOffer))
+        {
+            if(_currentMoveHandler is not DoubleGiftOfferResponseMoveHandler)
+                _currentMoveHandler = _moveHandlerProvider.GetMoveHandler(PlayerMoveTypeEnum.DoubleGiftOffer);
+        }
+        else
+        {
+            var clickedMoveCardEntity = GetClickedMoveCardEntity(mouseState);
+            if (clickedMoveCardEntity != null) ChangeSelectedMove(clickedMoveCardEntity);
+        }
 
         _currentMoveHandler?.Update(gameData, mouseState);
     }
